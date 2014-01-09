@@ -1,0 +1,20 @@
+##WICHTIG!!!
+um es überhaupt übersetzen zu können muss unter projekt->eigenschaften->konfigurations eigenschaften->linker->eingabe
+eine zusätzliche abhängigkeit eingefügt werden!
+
+ws2_32.lib <- muss dort eingefügt werden
+
+
+##TODO
+- saubere ausschrift was gerade passiert
+- pakete vertauschen einfügen
+- antworten mit fehlern bearbeiten
+- verbindungsabbau einfügen
+- parameter prüfen
+- ipv6 adressformate beachten (::1 für localhost etc.)
+
+
+##Test
+- auf entfernten rechnern testen
+- prüfen ob timeouts funktionieren
+- läuft die übermittlung der datei korrekt?

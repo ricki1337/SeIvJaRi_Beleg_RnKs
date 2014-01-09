@@ -1,0 +1,14 @@
+##WICHTIG!!!
+um es überhaupt übersetzen zu können muss unter projekt->eigenschaften->konfigurations eigenschaften->linker->eingabe
+eine zusätzliche abhängigkeit eingefügt werden!
+
+ws2_32.lib <- muss dort eingefügt werden
+
+
+##TODO
+- zusammenführung der datei
+- saubere ausschriften was gerade passiert
+- auf entfernten rechnern testen
+- paketverlust einbauen
+- prüfen ob verbindungsabbau funktioniert
+- läuft die übermittlung der datei korrekt?

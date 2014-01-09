@@ -1,0 +1,8 @@
+http://openbook.galileocomputing.de/c_von_a_bis_z/025_c_netzwerkprogrammierung_007.htm#mj111a55df67b579f4ca5d1646d87861f6 25.7.5 Windows-Quellcodedatei
+http://de.wikibooks.org/wiki/C-Programmierung:_Dateien
+http://www.cplusplus.com/reference/cstdio/fseek/
+http://openbook.galileocomputing.de/c_von_a_bis_z/017_c_dateien_verzeichnisse_001.htm
+http://www.cplusplus.com/reference/cstdio/fwrite/
+http://www.cplusplus.com/reference/cstdio/fread/
+http://www.cplusplus.com/reference/ctime/clock/
+http://msdn.microsoft.com/de-de/library/windows/desktop/ms740476(v=vs.85).aspx
