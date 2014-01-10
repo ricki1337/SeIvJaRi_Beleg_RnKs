@@ -5,13 +5,18 @@ eine zusätzliche abhängigkeit eingefügt werden!
 ws2_32.lib <- muss dort eingefügt werden
 
 
+
+#####TERMIN: Freitag, 17.01.
+
 ##TODO
-- saubere ausschrift was gerade passiert
-- pakete vertauschen einfügen
-- antworten mit fehlern bearbeiten
-- verbindungsabbau einfügen
-- parameter prüfen
-- ipv6 adressformate beachten (::1 für localhost etc.)
+- saubere ausschrift was gerade passiert +sepp
+- pakete vertauschen einfügen +sepp
+- antworten mit fehlern bearbeiten +jakob
+- verbindungsabbau einfügen +jakob
+- parameter prüfen +jakob
+- ipv6 adressformate beachten (::1 für localhost etc.) +sepp
+- verbindung auf dns basis +sepp
+- sende&empfangsfenster einhalten +jakob
 
 
 ##Test

@@ -4,11 +4,18 @@ eine zusätzliche abhängigkeit eingefügt werden!
 
 ws2_32.lib <- muss dort eingefügt werden
 
+###Termin: Freitag, 17.01.
+
 
 ##TODO
-- zusammenführung der datei
-- saubere ausschriften was gerade passiert
+- zusammenführung der datei +ivo
+- saubere ausschriften was gerade passiert +ivo
+- paketverlust einbauen +rick
+- auf verbindungsabbau reagieren +rick
+- sende&empfangsfenster einhalten +ivo
+
+
+
+##Test
 - auf entfernten rechnern testen
-- paketverlust einbauen
-- prüfen ob verbindungsabbau funktioniert
 - läuft die übermittlung der datei korrekt?
