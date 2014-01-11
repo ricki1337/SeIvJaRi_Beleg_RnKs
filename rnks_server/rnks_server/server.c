@@ -68,9 +68,9 @@ int main(int argc, char* argv[]){
 	char *tmpWindow_size = "";
 	int Window_size;
 	unsigned char wa;
-	int tmp=0, verbindungBeenden=0;
+	int tmp,tmp1, verbindungBeenden=0;
 
-	float timer;
+	clock_t timer;
 
 	//argumente auswerten
 	if (argc > 1) {
@@ -156,7 +156,9 @@ int main(int argc, char* argv[]){
 		do{
 			//senden
 			//timer starten
-			timer = (float)clock()/CLOCKS_PER_SEC;
+			timer = clock();
+
+			
 			//schleife 
 			do{
 				//wenn fenster vorhanden
@@ -187,19 +189,23 @@ int main(int argc, char* argv[]){
 					}
 				}else{
 					printf("Error! Server meldet: %s",errorTable[0]);//sendefenster voll!
-					Sleep(TIMEOUT_INT-(((float)clock()/CLOCKS_PER_SEC)-timer));
+					
+					Sleep(TIMEOUT_INT-(clock()-timer));
 					//break;//schleife verlassen
 				}
 			//solange zeit-timer < 200
-			}while((((float)clock()/CLOCKS_PER_SEC)-timer) > TIMEOUT_INT && (aktuellesFile-1) <= maxFiles);
+			}while((clock()-timer) < (clock_t)TIMEOUT_INT && (aktuellesFile-1) <= maxFiles);
 			
 			//empfangen
 			configSocket(); //timeout für recvfrom anpassen
 			//timer starten
-			timer = (float)clock()/CLOCKS_PER_SEC;
+			timer = clock();
 			do{
+				printf("Warte auf antwort");
 				//daten empfangen
 				SqAnswer = getAnswer();
+				if (SqAnswer == NULL) break;
+				printf("habe antwort...");
 				//quittungen prüfen und dateisegment aktualisieren
 				wa = SqAnswer->AnswType;
 				if(wa == AnswOk){ //welche fehler können denn auftauchen?
@@ -210,7 +216,9 @@ int main(int argc, char* argv[]){
 				}
 				//timer decrementieren
 				decrement_timer(timerArray);
-			}while((((float)clock()/CLOCKS_PER_SEC)-timer) > TIMEOUT_INT);
+				printf("clock: %d",clock());
+					printf("timer: %d",timer);
+			}while((clock()-timer) < (clock_t)TIMEOUT_INT);
 		//solange dateisegment nicht komplett quittiert
 		//&& getOpenWindows(fensterArray) != 0
 		}while(verbindungBeenden == 0);// && getTimeout(timerArray) != -1 && (aktuellesFile-1) != maxFiles);

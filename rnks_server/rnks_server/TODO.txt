@@ -16,7 +16,7 @@ ws2_32.lib <- muss dort eingefügt werden
 - parameter prüfen +jakob
 - ipv6 adressformate beachten (::1 für localhost etc.) +sepp
 - verbindung auf dns basis +sepp
-- sende&empfangsfenster einhalten +jakob
+- aktualisierung fensterArray funktioniert nicht +jakob
 
 
 ##Test

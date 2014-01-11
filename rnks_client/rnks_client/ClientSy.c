@@ -28,6 +28,7 @@ static struct sockaddr_in6 remoteAddr;
 struct sockaddr sockaddr_ip6_remote;
 SOCKADDR_STORAGE from;
 
+u_long blocking = 1;
 
 
 void initConnection(char *serverIP,char *port, char* file, char* fenstergroesse){
@@ -123,7 +124,9 @@ int initSocket(){
 		WSACleanup ();
 		exit( -1);
 	}
+
 	
+
 	ZeroMemory( &hints,sizeof(hints) );
 	hints.ai_family = AF_INET6;
 	hints.ai_socktype = SOCK_DGRAM;
@@ -186,9 +189,11 @@ struct request* getRequest() {
 	printf( "vor recvfrom\n" );
 	tmp = (char *) malloc(sizeof(struct request));
 	recvcc = recvfrom(ConnSocket, tmp, sizeof(struct request), 0, (struct sockaddr *) &remoteAddr, &remoteAddrSize);
+	printf("recvfrom: %d\n",recvcc);
 	memcpy(&req,tmp,sizeof(struct request));
-	//req = (struct request) tmp;
-	sizeof(req);
+	
+	if(WSAGetLastError() == 10035) return NULL;
+
 	if (recvcc == SOCKET_ERROR) {
 		fprintf(stderr, "recv() failed: error %d\n" ,WSAGetLastError());
 		closesocket(ConnSocket);
@@ -234,7 +239,14 @@ void sendAnswer(struct answer *answ) {
 }
 
 void configSocket(){
+	ioctlsocket(ConnSocket,FIONBIO,&blocking);
 	if(!setsockopt(ConnSocket,SOL_SOCKET,SO_SNDTIMEO,(const char *)'1',sizeof(char))){ //ändere socketoption, sodass der timeout von recvfrom bei 1 ms zuschlägt
+		printf("Error! setsockopt throws error nr. %d", WSAGetLastError());
+		closesocket(ConnSocket);
+		WSACleanup ();
+		exit(-1);
+	}
+	if(!setsockopt(ConnSocket,SOL_SOCKET,SO_RCVTIMEO,(const char *)'1',sizeof(char))){ //ändere socketoption, sodass der timeout von recvfrom bei 1 ms zuschlägt
 		printf("Error! setsockopt throws error nr. %d", WSAGetLastError());
 		closesocket(ConnSocket);
 		WSACleanup ();

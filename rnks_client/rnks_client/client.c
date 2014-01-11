@@ -21,29 +21,22 @@ void Usage(char *ProgName){ //How to use program
 }
 
 int main( int argc, char *argv[]){
-	/*
-	
-	- prüfen der parameter
-	- einrichten des socket
-	- senden der acknowledgements
-	- puffern der daten dyn. array
-	- zusammensetzen der datei
-	- speichern der datei
-	*/
-
-			//...
-			
 			long i;
-			int Paketverlust = 0;
-			struct request erstverbindung, paket;
+			int Paketverlust = 0,PaketverlustProzent = DEFAULT_FAILURE;
+			struct request erstverbindung, *paket;
 			struct answer antwort;
 			int verbindungBeendet = 0, ackWindow;
-			float timer;
+			clock_t timer;
 			FILE *fp;
+			char *PaketverlustProzenttmp;
 
 			struct window	*fensterArray = NULL;
 			struct request	*fileArray = NULL;
 			int fileArraySize = 0;
+
+			//zufallszahl für paketverlust
+			srand(time(0));
+
 
 			//Parameter überprüfen
 			if (argc > 1) {
@@ -54,6 +47,7 @@ int main( int argc, char *argv[]){
 							case 'p':	if (argv[i + 1]){
 											if (argv[i + 1][0] != '-' ){
 												Paketverlust = 1;
+												PaketverlustProzenttmp = argv[++i];
 												break;
 											}
 										}
@@ -67,8 +61,8 @@ int main( int argc, char *argv[]){
 			//socket registrieren
 			initSocket();
 			
-			//antwort vorbereiten
-			//antwort = (struct answer *) malloc(sizeof(struct answer));
+			//paketverlust überschreiben
+			if(strlen(PaketverlustProzenttmp)>0) PaketverlustProzent = atoi(PaketverlustProzenttmp);
 			
 			//auf verbindung warten
 			memcpy(&erstverbindung,getRequest(),sizeof(struct request));
@@ -99,36 +93,47 @@ int main( int argc, char *argv[]){
 			//schleife
 			do {
 				//timer starten
-				timer = (float)clock()/CLOCKS_PER_SEC;
-
+				timer = clock();
+				printf("Timer start: %d",timer);
 				//socket konfigurieren
-				configSocket(); //timeout für sendto anpassen
+				configSocket(); //timeout für recvfrom anpassen
 				//schleife
 				do{
+					//daten "verlieren"...
+					if(Paketverlust && (rand() % 100) <= PaketverlustProzent) break;
+					printf("Warte auf daten");
 					//daten empfangen
-					memcpy(&paket,getRequest(),sizeof(struct request));
+					//memcpy(&paket,getRequest(),sizeof(struct request));
+					paket = getRequest();
+					if (paket == NULL) break;
+					printf("habe daten...");
 					//daten prüfen 
-					if(paket.ReqType == ReqData && paket.SeNr < fileArraySize){
+					if(paket->ReqType == ReqData && paket->SeNr < fileArraySize){
 						//daten speichern
-						memcpy(&fileArray[paket.SeNr],&paket,sizeof(paket));
+						memcpy(&fileArray[paket->SeNr],paket,sizeof(struct answer));
 						//quittung markieren
-						getNextFreeWindow(fensterArray,paket.SeNr,AnswOk,-1);
-					}else if(paket.ReqType == ReqClose){
-						getNextFreeWindow(fensterArray,paket.SeNr,AnswClose,-1);
+						getNextFreeWindow(fensterArray,paket->SeNr,AnswOk,-1);
+					}else if(paket->ReqType == ReqClose){
+						getNextFreeWindow(fensterArray,paket->SeNr,AnswClose,-1);
 					}else{
-						getNextFreeWindow(fensterArray,paket.SeNr,AnswErr,4);
+						getNextFreeWindow(fensterArray,paket->SeNr,AnswErr,4);
 					}
 
 					
 				//solange zeit-timer < 200
-				}while((((float)clock()/CLOCKS_PER_SEC)-timer) > TIMEOUT_INT);
+					printf("clock: %d",clock());
+					printf("timer: %d",timer);
+				}while((clock()-timer) < (clock_t)TIMEOUT_INT);
 				
 				//timer starten
-				timer = (float)clock()/CLOCKS_PER_SEC;
+				timer = clock();
 				//schleife
 				do{
+					//ack "verlieren"...
+					if(Paketverlust && (rand() % 100) <= PaketverlustProzent) break;
 					//noch nicht verschickte ack schicken
-					ackWindow = getWindowWithAck(fensterArray); //window mit ack holen
+					
+					if((ackWindow = getWindowWithAck(fensterArray)) == -1) break; //window mit ack holen
 					
 					if(fensterArray[ackWindow].AnswType == AnswOk){
 						antwort.AnswType = fensterArray[ackWindow].AnswType;	
@@ -145,7 +150,7 @@ int main( int argc, char *argv[]){
 					}
 					sendAnswer(&antwort);
 				//solange zeit-timer < 200
-				}while((((float)clock()/CLOCKS_PER_SEC)-timer) > TIMEOUT_INT);
+				}while((clock()-timer) < (clock_t)TIMEOUT_INT);
 			//solange die verbindung nicht beendet wurde
 			}while(!verbindungBeendet);
 			

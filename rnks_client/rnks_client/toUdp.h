@@ -8,3 +8,4 @@ for Client & Server
 #define DEFAULT_PORT "50000" //50000 ... arbitrary test port
 #define BUFFER_SIZE 65500 //65536
 #define UNKNOWN_NAME "<unknown>"
+#define DEFAULT_FAILURE 15 //wenn kein paketverlustwert angegeben wurde...15% verlust
