@@ -14,9 +14,9 @@
 //#include "data.h"
 
 void Usage(char *ProgName){ //How to use program
-	fprintf(stderr, "\nHow to use.\n");
-	fprintf(stderr, "\n%s [-r] [-p]\n\n", ProgName);
-	fprintf(stderr, "[-p]\tzufällige Paketverluste (default AUS).");
+	fprintf(stderr, "\nWrong input. How to use:\n");
+	fprintf(stderr, "\n%s [-p 1-100]\n", ProgName);
+	fprintf(stderr, "\n[-p]\tRandom packet loose percentage. (Default 0=OFF).\n");
 	exit(1);
 }
 
@@ -28,7 +28,7 @@ int main( int argc, char *argv[]){
 			int verbindungBeendet = 0, ackWindow;
 			clock_t timer;
 			FILE *fp;
-			char *PaketverlustProzenttmp;
+			char *PaketverlustProzenttmp = "";
 
 			struct window	*fensterArray = NULL;
 			struct request	*fileArray = NULL;
@@ -37,8 +37,7 @@ int main( int argc, char *argv[]){
 			//zufallszahl für paketverlust
 			srand(time(0));
 
-
-			//Parameter überprüfen
+			//Eingabeparameter überprüfen
 			if (argc > 1) {
 				for (i = 1; i < argc; i++) {
 					if (((argv[i][0] == '-' ) || (argv[i][0] == '/' )) && (argv[i][1] != 0) && (argv[i][2] == 0)) {
@@ -58,6 +57,7 @@ int main( int argc, char *argv[]){
 					}//else Usage(argv[0]);
 				}
 			}
+
 			//socket registrieren
 			initSocket();
 			
