@@ -13,5 +13,5 @@
 #define P_MESSAGE_6 "\n%s [-s server] [-p port] [-f file] [-w window_size]\n\n"
 #define P_MESSAGE_7 " server\tName or IP address on wich to connect. (default: %s)\n"
 #define P_MESSAGE_8 " port\t\tPort on which to connect. (default: %s)\n"
-#define P_MESSAGE_9 " file\t\tFile wich to recieve. (default: empty)\n"
+#define P_MESSAGE_9 " file\t\tFile to send. (default: empty)\n"
 #define P_MESSAGE_10 " window_size\t\twindow size of Selective Repeat Protocol (maximum: 10).\n"

@@ -27,12 +27,12 @@ int main( int argc, char *argv[]){
 			struct answer antwort;
 			int verbindungBeendet = 0, ackWindow;
 			clock_t timer;
-			FILE *fp;
+			FILE *fp=NULL;
 			char *PaketverlustProzenttmp = "";
 
 			struct window	*fensterArray = NULL;
 			struct request	*fileArray = NULL;
-			int fileArraySize = 0;
+			unsigned int fileArraySize = 0;
 
 			//zufallszahl für paketverlust
 			srand(time(0));
@@ -75,6 +75,7 @@ int main( int argc, char *argv[]){
 				fensterArray = createWindowArray(erstverbindung.FlNr);
 				//antwort füllen
 				antwort.AnswType = AnswHello;
+				printf("\nSend Answer (AnswHello)...\n");
 				antwort.SeNo = erstverbindung.SeNr; //filesize bestätigen
 				antwort.FlNr = erstverbindung.FlNr; //fenstergröße bestätigen
 				//fenstergröße zwischenspeichern
@@ -94,19 +95,19 @@ int main( int argc, char *argv[]){
 			do {
 				//timer starten
 				timer = clock();
-				printf("Timer start: %d",timer);
+				printf("Timer start: %d\n",timer);
 				//socket konfigurieren
 				configSocket(); //timeout für recvfrom anpassen
 				//schleife
 				do{
 					//daten "verlieren"...
 					if(Paketverlust && (rand() % 100) <= PaketverlustProzent) break;
-					printf("Warte auf daten");
+					printf("Wait for further data... ");
 					//daten empfangen
 					//memcpy(&paket,getRequest(),sizeof(struct request));
 					paket = getRequest();
 					if (paket == NULL) break;
-					printf("habe daten...");
+					printf("received more data...\n");
 					//daten prüfen 
 					if(paket->ReqType == ReqData && paket->SeNr < fileArraySize){
 						//daten speichern
@@ -121,8 +122,8 @@ int main( int argc, char *argv[]){
 
 					
 				//solange zeit-timer < 200
-					printf("clock: %d",clock());
-					printf("timer: %d",timer);
+					printf("clock: %d\n",clock());
+					printf("timer: %d\n",timer);
 				}while((clock()-timer) < (clock_t)TIMEOUT_INT);
 				
 				//timer starten
@@ -158,6 +159,20 @@ int main( int argc, char *argv[]){
 			exitSocket();
 
 			//datei erstellen
-				//openFile(erstverbindung->fname,fp);
-			//datei zusammensetzen und speichern
-		}
+			if (openFile(erstverbindung.fname,fp)) {
+				
+				//datei zusammensetzen und speichern
+				if (saveFile(fp,fileArray,fileArraySize))  {
+					closeFile(fp);
+					printf("File sucessfull transfered and saved.\nExiting...\n");
+					exit(1);
+					}
+				} 
+				
+			/*printf("Error opening file %s for writing!\n",fileArray->fname);
+			exit(-1);*/				
+
+			printf("Error while writing fileArray to file!\n");
+			exit(-1);
+	
+}

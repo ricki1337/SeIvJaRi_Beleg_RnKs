@@ -100,11 +100,19 @@ void initConnection(char *serverIP,char *port, char* file, char* fenstergroesse)
 	}
 }
 
+//Socket init
 int initSocket(){
 	int b;
 	int val,i=0;
 	int addr_len;
+	
+	/*define for IPv6 Address convert
+	LPSOCKADDR sockaddr_ip;
+	TCHAR ipstringbuffer[46];
+    DWORD ipbufferlength = 46;
+	INT iRetval;*/
 
+	/*  addrinfo structure is used by the getaddrinfo function to hold host address information.*/
 	struct addrinfo *result = NULL, *ptr = NULL, hints;
 
 	WSADATA wsaData;
@@ -117,6 +125,11 @@ int initSocket(){
 		exit(-1);
 	}
 
+	/*socket function creates a socket that is bound to a specific transport service provider
+	AF_INET6   -> Internet Protocol version 6 (IPv6)
+	SOCK_DGRAM -> Socket supports User datagram protocol
+	IPPROTO_UDP-> use User Datagram Protocol (UDP) */
+
 	ConnSocket = socket(AF_INET6, SOCK_DGRAM, IPPROTO_UDP);
 	
 	if (ConnSocket <0 ) {
@@ -126,7 +139,8 @@ int initSocket(){
 	}
 
 	
-
+	/*hints is an optional pointer to a struct addrinfo, as defined by <netdb.h> ...
+	This structure can be used to provide hints concerning the type of socket that the caller supports or wishes to use*/
 	ZeroMemory( &hints,sizeof(hints) );
 	hints.ai_family = AF_INET6;
 	hints.ai_socktype = SOCK_DGRAM;
@@ -143,15 +157,15 @@ int initSocket(){
 		WSACleanup();
 		exit(-1);
 	}
-	
 	printf( "getaddrinfo returned success\n" );
 	
-	//Retrieve the address
+	//Retrieve the address?
 	
 	for (ptr=result; ptr != NULL ;ptr=ptr->ai_next) {
 		printf( "getaddrinfo response %d\n" , i++);
 		printf( "\tFlags: 0x%x\n" , ptr->ai_flags);
 		printf( "\tFamily: ");
+		
 		switch (ptr->ai_family) {
 			case AF_UNSPEC:	printf( "Unspecified\n" );
 							break;
@@ -160,11 +174,21 @@ int initSocket(){
 			case AF_INET6:	printf( "AF_INET6 (IPv6)\n" );
 							sockaddr_ip6_local = (struct sockaddr *) ptr->ai_addr;
 							addr_len= ptr->ai_addrlen;
+ 
+							/*// We use WSAAddressToString since it is supported on Windows XP and later
+							// The buffer length is changed by each call to WSAAddresstoString
+							// So we need to set it for each iteration through the loop for safety
+							ipbufferlength = 46;
+							iRetval = WSAAddressToString(sockaddr_ip6_local, (DWORD) ptr->ai_addrlen, NULL, ipstringbuffer, &ipbufferlength );
+							if (iRetval)
+								printf("WSAAddressToString failed with %u\n", WSAGetLastError() );
+							else    
+								printf("\tIPv6 address: %s\n", ipstringbuffer);*/
+
 							break;
 			default :		printf("Other %ld\n" , ptr->ai_family);
 							break;
 		}
-
 		// Bind socket to host address
 		printf( "in bind\n" );
 		b = bind(ConnSocket, sockaddr_ip6_local, addr_len);
@@ -188,21 +212,23 @@ struct request* getRequest() {
 	/* Receive a message from a socket */
 	printf( "vor recvfrom\n" );
 	tmp = (char *) malloc(sizeof(struct request));
+	
+	printf("\nWait for message from socket...");
 	recvcc = recvfrom(ConnSocket, tmp, sizeof(struct request), 0, (struct sockaddr *) &remoteAddr, &remoteAddrSize);
-	printf("recvfrom: %d\n",recvcc);
+	printf("\tpacket received, size: %d\n",recvcc);
 	memcpy(&req,tmp,sizeof(struct request));
 	
 	if(WSAGetLastError() == 10035) return NULL;
 
 	if (recvcc == SOCKET_ERROR) {
-		fprintf(stderr, "recv() failed: error %d\n" ,WSAGetLastError());
+		fprintf(stderr, "receive from socket failed: error %d\n" ,WSAGetLastError());
 		closesocket(ConnSocket);
 		WSACleanup();
 		exit(-1);
 	}
 	
 	if (recvcc == 0){
-		printf("Client closed connection\n" );
+		printf("Sender closed connection\n" );
 		closesocket(ConnSocket);
 		WSACleanup ();
 		exit(-1);
@@ -269,19 +295,19 @@ int exitSocket() {
 
 void printRequest(struct request *req){
 	printf("\n\n");
-	printf("\t##Request\n");
-	printf("ReqType: %c\n",req->ReqType);
-	printf("SqNr: %d\n",req->SeNr);
-	printf("FlNr: %d\n",req->FlNr);
-	printf("fname: %s\n",req->fname);
-	printf("name: %s\n",req->name);
+	printf("##Request from Sender\n");
+	printf("\tRequest Type: \t%c\n",req->ReqType);
+	printf("\tSequenz no.: \t%d\n",req->SeNr);
+	printf("\tFile no.: \t%d\n",req->FlNr);
+	printf("\tFilename: \t%s\n",req->fname);
+	printf("\tname: \t%s\n",req->name);
 	printf("\n\n");
 }
 void printAnswer(struct answer *ans){
 	printf("\n\n");
-	printf("\t##Answer\n");
-	printf("AnswType: %c\n",ans->AnswType);
-	printf("SqNr: %d\n",ans->SeNo);
-	printf("FlNr: %d\n",ans->FlNr);
+	printf("##Answer to Sender\n");
+	printf("\tAnswer Type: \t%c\n",ans->AnswType);
+	printf("\tSequenz no.: \t%d\n",ans->SeNo);
+	printf("\tFile no.: \t%d\n",ans->FlNr);
 	printf("\n\n");
 }

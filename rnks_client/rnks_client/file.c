@@ -4,20 +4,24 @@
 #include <string.h>
 #include "data.h"
 /*
-	- öffnen der file im textmodus
-	- zerteilen der file in ein array a PufferSize-1 + 50-1 zeichen
+	- öffnen der file im textmodus zum schreiben
+	- zusammenfügen der file aus einem array
 	- schließen der file
 */
 
 int openFile(char *fileName, FILE *fp){
-	fp = fopen(fileName,"w+"); //datei zum lesen öffnen
-	if(fp == NULL) return 0; //datei existiert nicht oder konnte nicht geöffnet werden
+	fp = fopen(fileName,"w+"); //datei zum schreiben öffnen
+	if(fp == NULL) {
+		printf("Error: Could not open file %s!\n",fileName);
+			return 0; //datei konnte nicht geöffnet werden
+		}
 	return 1;
 }
 
 
 void closeFile(FILE *fp){
 	if(fp != NULL) fclose(fp);
+	printf("Succesfull closed file.\n");
 }
 
 struct request* createFileArray(int filesize){
@@ -38,3 +42,16 @@ struct request* createFileArray(int filesize){
 		return FileArray;
 }
 
+//Save files from FileArray to local file
+int saveFile(FILE *fp, struct request *FileArray, int sizeFA) {
+	//char buf[PufferSize];
+	int i,c;
+
+	for (i=0;i<sizeFA;i++) {
+		//alternativ zeichenweiße, da mögliche mehrinhalte beim auffüllen des Puffers fileArray.name?
+		//noch zu testen...
+		if (c=fputs(FileArray[i].name,fp)==EOF)
+			return 0;
+		}
+	return 1;
+}

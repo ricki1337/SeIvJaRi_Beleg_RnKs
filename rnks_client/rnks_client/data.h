@@ -13,7 +13,7 @@ extern char *errorTable[];
 struct request {
 	unsigned char ReqType;
 	#define ReqHello 'H' //ReqHello
-	#define ReqData 'D' //ReqData 'D'
+	#define ReqData 'D' //ReqData
 	#define ReqClose 'C' //ReqClose
 	long FlNr; /*length of data in Byte
 				if it is a Hello packet we transmit the window here*/
