@@ -14,9 +14,9 @@
 //#include "data.h"
 
 void Usage(char *ProgName){ //How to use program
-	fprintf(stderr, "\nWrong input. How to use:\n");
+	fprintf(stderr, "\nKommandoparameter:\n");
 	fprintf(stderr, "\n%s [-p 1-100]\n", ProgName);
-	fprintf(stderr, "\n[-l]\tRandom packet loose percentage. (Default 0=OFF).\n");
+	fprintf(stderr, "\n[-l]\tZuf\x84lliger Paketverlust in Prozent. (Standard 0=OFF).\n");
 	exit(1);
 }
 
@@ -82,7 +82,7 @@ int main( int argc, char *argv[]){
 				fensterArray = createWindowArray(erstverbindung.FlNr);
 				//antwort füllen
 				antwort.AnswType = AnswHello;
-				printf("\nSend Answer (AnswHello)...\n");
+				printf("\nSende Antwort (AnswHello)...\n");
 				antwort.SeNo = erstverbindung.SeNr; //filesize bestätigen
 				antwort.FlNr = erstverbindung.FlNr; //fenstergröße bestätigen
 				//fenstergröße zwischenspeichern
@@ -110,7 +110,7 @@ int main( int argc, char *argv[]){
 					//daten prüfen 
 					if(paket->ReqType == ReqData && paket->SeNr < fileArraySize){
 						//daten speichern
-						memcpy(&fileArray[paket->SeNr],paket,sizeof(struct answer));
+						memcpy(&fileArray[paket->SeNr],paket,sizeof(struct request));
 						//quittung markieren
 						getNextFreeWindow(fensterArray,paket->SeNr,AnswOk,-1);
 					}else if(paket->ReqType == ReqClose){
@@ -208,15 +208,15 @@ int main( int argc, char *argv[]){
 			
 			//socket freigeben
 			exitSocket();
-
+			
 			//datei erstellen
-			printf("File open\n");
-			if (openFile(erstverbindung.fname,fp)) {
-				printf("File save\n");
+
+			if (fp=openFile(erstverbindung.fname,&fp)) {
+				printf("\nDatei wird gespeichert...\n");
 				//datei zusammensetzen und speichern
-				if (saveFile(fp,fileArray,fileArraySize))  {
+				if (saveFile(fp,fileArray,(fileArraySize/PufferSize)))  {
 					closeFile(fp);
-					printf("File sucessfull transfered and saved.\nExiting...\n");
+					printf("Datei übermittelt und gespeichert.\nBeende...\n");
 					exit(1);
 					}
 				} 
@@ -224,7 +224,7 @@ int main( int argc, char *argv[]){
 			/*printf("Error opening file %s for writing!\n",fileArray->fname);
 			exit(-1);*/				
 
-			printf("Error while writing fileArray to file!\n");
+			printf("Error: Fehler beim Schreiben der Daten in die Datei!\n");
 			exit(-1);
 	
 }

@@ -87,12 +87,12 @@ int initSocket(char * port){
 		WSACleanup();
 		exit(-1);
 	}
-	printf( "getaddrinfo returned success\n" );
+	//printf( "getaddrinfo returned success\n" );
 	
 	//Retrieve the address?
-	
+	printf("Initialisiere Socket...\n");
 	for (ptr=result; ptr != NULL ;ptr=ptr->ai_next) {
-		printf( "getaddrinfo response %d\n" , i++);
+		//printf( "getaddrinfo response %d\n" , i++);
 		printf( "\tFlags: 0x%x\n" , ptr->ai_flags);
 		printf( "\tFamily: ");
 		
@@ -106,22 +106,23 @@ int initSocket(char * port){
 			case AF_INET6:	printf( "AF_INET6 (IPv6)\n" );
 							sockaddr_ip6_local = (struct sockaddr *) ptr->ai_addr;
 							addr_len= ptr->ai_addrlen;
-							printf("\tIPv6 Addresse/Port: %s",ipv6convert(ptr));
+							printf("\tIPv6 Addresse/Port: %s\n",ipv6convert(ptr));
 							break;
 			default :		printf("Other %ld\n" , ptr->ai_family);
 							break;
 		}
 		
 		// Bind socket to host address
-		printf( "in bind\n" );
+		
 		b = bind(ConnSocket, sockaddr_ip6_local, addr_len);
 		if (b == SOCKET_ERROR) {
 			fprintf(stderr, "bind() failed: error %d\n" ,WSAGetLastError());
 			WSACleanup();
 			exit (-1);
 		}
+		
 	}
-	
+	printf( "\n... Socket erfolgreich initialisiert.\n" );
 	freeaddrinfo(result);
 	return (0);
 }
@@ -133,25 +134,26 @@ struct request* getRequest() {
 	struct request req;
 	char* tmp;
 	/* Receive a message from a socket */
-	printf( "vor recvfrom\n" );
+	//printf( "vor recvfrom\n" );
 	tmp = (char *) malloc(sizeof(struct request));
 	
-	printf("\nWait for message from socket...");
+	printf("\nWarte auf Request... ");
 	recvcc = recvfrom(ConnSocket, tmp, sizeof(struct request), 0, (struct sockaddr *) &remoteAddr, &remoteAddrSize);
-	printf("\tpacket received, size: %d\n",recvcc);
+	//printf("Packet from %s",ipv6convert(remoteAddr));
+	printf("\tPacket empfangen, gr\x94sse: %d\n",recvcc);
 	memcpy(&req,tmp,sizeof(struct request));
 	
 	if(WSAGetLastError() == 10035) return NULL;
 
 	if (recvcc == SOCKET_ERROR) {
-		fprintf(stderr, "receive from socket failed: error %d\n" ,WSAGetLastError());
+		fprintf(stderr, "Empfang fehlgeschlagen: error %d\n" ,WSAGetLastError());
 		closesocket(ConnSocket);
 		WSACleanup();
 		exit(-1);
 	}
 	
 	if (recvcc == 0){
-		printf("Sender closed connection\n" );
+		printf("Sender hat Verbindung beendet...\n" );
 		closesocket(ConnSocket);
 		WSACleanup ();
 		exit(-1);
@@ -218,20 +220,20 @@ int exitSocket() {
 
 void printRequest(struct request *req){
 	printf("\n\n");
-	printf("##Request from Sender\n");
-	printf("\tRequest Type: \t%c\n",req->ReqType);
-	printf("\tSequenz no.: \t%d\n",req->SeNr);
-	printf("\tFile no.: \t%d\n",req->FlNr);
+	printf("##Request vom Sender\n");
+	printf("\tReqType: \t%c\n",req->ReqType);
+	printf("\tSqNo.: \t%d\n",req->SeNr);
+	printf("\tFlNo.: \t%d\n",req->FlNr);
 	printf("\tFilename: \t%s\n",req->fname);
-	printf("\tname: \t%s\n",req->name);
+	printf("\tData: \t%s\n",req->name);
 	printf("\n\n");
 }
 void printAnswer(struct answer *ans){
 	printf("\n\n");
-	printf("##Answer to Sender\n");
-	printf("\tAnswer Type: \t%c\n",ans->AnswType);
-	printf("\tSequenz no.: \t%d\n",ans->SeNo);
-	printf("\tFile no.: \t%d\n",ans->FlNr);
+	printf("##Antwort zum Sender\n");
+	printf("\tAnsType: \t%c\n",ans->AnswType);
+	printf("\tSqNo.: \t%d\n",ans->SeNo);
+	printf("\tFlNo.: \t%d\n",ans->FlNr);
 	printf("\n\n");
 }
 
@@ -252,7 +254,7 @@ char* ipv6convert(struct addrinfo *pipv6) {
 	if (!(iRetval))
 		return ipa;
 
-	printf("WSAAddressToString failed with %u\n", WSAGetLastError() );
+	printf("WSAAddressToString fehlgeschlagen mit %u\n", WSAGetLastError() );
   	return "NULL";
 		
 	
