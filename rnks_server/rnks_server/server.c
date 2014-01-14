@@ -122,7 +122,7 @@ int main(int argc, char* argv[]){
 					
 					}else Usage(argv[0]);
 				}
-			}
+			} else Usage(argv[0]); 
 	//fenstergröße setzen
 	Window_size = DEFAULT_WINDOW;
 	if(tmpWindow_size != "")

@@ -6,7 +6,7 @@
 #include <errno.h>
 //#include "data.h"
 #include "toUdp.h"
-
+//#include <tchar.h>
 #include <ctype.h>
 
 /*static struct request req;*/
@@ -31,18 +31,15 @@ SOCKADDR_STORAGE from;
 u_long blocking = 1;
 
 
-
+	WSADATA wsaData;
 //Socket init
 int initSocket(char * port){
 	int b;
 	int val,i=0;
 	int addr_len;
 	
-	/*define for IPv6 Address convert
-	LPSOCKADDR sockaddr_ip;
-	TCHAR ipstringbuffer[46];
-    DWORD ipbufferlength = 46;
-	INT iRetval;*/
+	
+
 
 	/*  addrinfo structure is used by the getaddrinfo function to hold host address information.*/
 	struct addrinfo *result = NULL, *ptr = NULL, hints;
@@ -99,6 +96,8 @@ int initSocket(char * port){
 		printf( "\tFlags: 0x%x\n" , ptr->ai_flags);
 		printf( "\tFamily: ");
 		
+		
+
 		switch (ptr->ai_family) {
 			case AF_UNSPEC:	printf( "Unspecified\n" );
 							break;
@@ -107,21 +106,12 @@ int initSocket(char * port){
 			case AF_INET6:	printf( "AF_INET6 (IPv6)\n" );
 							sockaddr_ip6_local = (struct sockaddr *) ptr->ai_addr;
 							addr_len= ptr->ai_addrlen;
- 
-							/*// We use WSAAddressToString since it is supported on Windows XP and later
-							// The buffer length is changed by each call to WSAAddresstoString
-							// So we need to set it for each iteration through the loop for safety
-							ipbufferlength = 46;
-							iRetval = WSAAddressToString(sockaddr_ip6_local, (DWORD) ptr->ai_addrlen, NULL, ipstringbuffer, &ipbufferlength );
-							if (iRetval)
-								printf("WSAAddressToString failed with %u\n", WSAGetLastError() );
-							else    
-								printf("\tIPv6 address: %s\n", ipstringbuffer);*/
-
+							printf("\tIPv6 Addresse/Port: %s",ipv6convert(ptr));
 							break;
 			default :		printf("Other %ld\n" , ptr->ai_family);
 							break;
 		}
+		
 		// Bind socket to host address
 		printf( "in bind\n" );
 		b = bind(ConnSocket, sockaddr_ip6_local, addr_len);
@@ -244,3 +234,26 @@ void printAnswer(struct answer *ans){
 	printf("\tFile no.: \t%d\n",ans->FlNr);
 	printf("\n\n");
 }
+
+char* ipv6convert(struct addrinfo *pipv6) {
+	// We use WSAAddressToString since it is supported on Windows XP and later
+	// The buffer length is changed by each call to WSAAddresstoString
+	// So we need to set it for each iteration through the loop for safety
+	
+	/* for IPv6 Adress resolution LPSOCKADDR->Unicode->Ansi*/
+	TCHAR ipw[46];
+	CHAR ipa[46];
+	DWORD ipbufferlength = 46;
+	INT iRetval;
+
+	ipbufferlength = 46;
+	iRetval = WSAAddressToString(pipv6->ai_addr, (DWORD) pipv6->ai_addrlen, NULL, ipw, &ipbufferlength );
+	wcstombs(ipa,ipw,ipbufferlength);
+	if (!(iRetval))
+		return ipa;
+
+	printf("WSAAddressToString failed with %u\n", WSAGetLastError() );
+  	return "NULL";
+		
+	
+	}
