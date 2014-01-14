@@ -26,6 +26,7 @@ void initConnection(char *empfIP,char *port, char* file, int fenstergroesse){
 	char* reqChar;
 	int retSend, reqLen,test;
 	unsigned long addr;
+	struct hostent *host_info;
 
 	WSADATA wsaData;
 	WORD wVersionRequested;
@@ -56,10 +57,10 @@ void initConnection(char *empfIP,char *port, char* file, int fenstergroesse){
        /* serverIP ist eine numerische IP-Adresse. */
        memcpy( (char *)&remoteAddr.sin6_addr, &addr, sizeof(addr));
    }
-	//TODO: DNS?
 	
 	//fallback wenn serverIP == NULL -> localhost!
-	if( empfIP == NULL) remoteAddr.sin6_addr = in6addr_loopback;
+	if( empfIP == NULL) 
+		remoteAddr.sin6_addr = in6addr_loopback;
 
 	
 	remoteAddr.sin6_port = htons(atoi(port)); //port setzen
@@ -144,18 +145,6 @@ struct answer* getAnswer(){
 
 	return (&req);
 }
-
-
-void configSocket(){
-	ioctlsocket(ConnSocket,FIONBIO,&blocking);
-	if(!setsockopt(ConnSocket,SOL_SOCKET,SO_RCVTIMEO,(const char *)&timeoutsocket,sizeof(char))){ //ändere socketoption, sodass der timeout von recvfrom bei 1 ms zuschlägt
-		printf("Error! setsockopt throws error nr. %d", WSAGetLastError());
-		closesocket(ConnSocket);
-		WSACleanup ();
-		exit(-1);
-	}
-}
-
 
 int exitSocket() {
 	

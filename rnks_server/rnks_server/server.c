@@ -62,6 +62,7 @@ int main(int argc, char* argv[]){
 	int reihenfolgeVertauschen = 0;
 	int Paketverlust = 0;
 	char *Empfaenger = DEFAULT_SERVER;
+	char *EmpfaengerDNS = "";
 	char *Filename = "";
 	char *Port = DEFAULT_PORT;
 	//Default Window Size -> prog argument
@@ -77,6 +78,7 @@ int main(int argc, char* argv[]){
 				for (i = 1; i < argc; i++) {
 					if (((argv[i][0] == '-' ) || (argv[i][0] == '/' )) && (argv[i][1] != 0) && (argv[i][2] == 0)) {
 						switch (tolower(argv[i][1])) {
+							
 							//empfänger Adresse
 							case 'a':	if(argv[i + 1]){
 											if(argv[i + 1][0] != '-' ){
@@ -230,7 +232,6 @@ int main(int argc, char* argv[]){
 
 			//setze abbruchbedingung
 			if(SqAnswer.AnswType == AnswClose) verbindungBeenden = 1;
-			printf("Pruefung: %d != -1 # %d != 0 # %d==0\n",getTimeout(timerArray),getOpenWindows(fensterArray),verbindungBeenden);
 		//solange keine Antwort über ReqClose oder noch offene Timeouts oder noch nicht bestätigte Nachrichten
 		}while(getTimeout(timerArray) != -1 || getOpenWindows(fensterArray) != 0 || verbindungBeenden == 0);
 

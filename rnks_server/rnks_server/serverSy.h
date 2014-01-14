@@ -6,10 +6,9 @@
 #include <ctype.h>
 #include <time.h>
 
-void initConnection(char *server,char *port, char* file, int fenstergroesse);
+void initConnection(char *empfIP,char *port, char* file, int fenstergroesse);
 void sendRequest(struct request *paket);
 struct answer* getAnswer();
-void configSocket();
 int exitSocket();
 void printRequest(struct request *req);
 void printAnswer(struct answer *ans);

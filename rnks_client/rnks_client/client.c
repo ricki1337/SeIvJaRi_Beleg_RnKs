@@ -15,8 +15,9 @@
 
 void Usage(char *ProgName){ //How to use program
 	fprintf(stderr, "\nWrong input. How to use:\n");
-	fprintf(stderr, "\n%s [-p 1-100]\n", ProgName);
-	fprintf(stderr, "\n[-l]\tRandom packet loose percentage. (Default 0=OFF).\n");
+	fprintf(stderr, "\n%s [-l 1-100] [-p port]\n", ProgName);
+	fprintf(stderr, "\n[-l]\tRandom packet loose percentage. (Default %d).\n",DEFAULT_FAILURE);
+	fprintf(stderr, " port\t\tPort on which to bind. (default: %s)\n",DEFAULT_PORT);
 	exit(1);
 }
 
