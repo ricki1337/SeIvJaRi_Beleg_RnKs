@@ -1,6 +1,6 @@
 //only some parts ... of the clientApp
 #include "ClientSy.h" //SAP to our protocol
-#include "config.h"
+//#include "config.h" Wird nicht gebraucht
 #include <dos.h>
 #include <time.h>
 #include <stdio.h>
@@ -203,8 +203,9 @@ int main( int argc, char *argv[]){
 			exitSocket();
 
 			//datei erstellen
+			printf("File open\n");
 			if (openFile(erstverbindung.fname,fp)) {
-				
+				printf("File save\n");
 				//datei zusammensetzen und speichern
 				if (saveFile(fp,fileArray,fileArraySize))  {
 					closeFile(fp);

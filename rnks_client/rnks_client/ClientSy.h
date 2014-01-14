@@ -15,3 +15,4 @@ void configSocket();
 int exitSocket();
 void printRequest(struct request *req);
 void printAnswer(struct answer *ans);
+char* ipv6convert(struct addrinfo *pipv6);
