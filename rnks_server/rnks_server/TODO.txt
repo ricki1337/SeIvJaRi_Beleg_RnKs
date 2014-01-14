@@ -12,11 +12,9 @@ ws2_32.lib <- muss dort eingefügt werden
 - saubere ausschrift was gerade passiert +sepp
 - pakete vertauschen einfügen +sepp
 - antworten mit fehlern bearbeiten +jakob
-- verbindungsabbau einfügen +rick
 - parameter prüfen +jakob
 - ipv6 adressformate beachten (::1 für localhost etc.) +jakob
 - verbindung auf dns basis +sepp
-- aktualisierung fensterArray funktioniert nicht +jakob
 
 
 ##Test
