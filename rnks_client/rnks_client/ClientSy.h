@@ -7,8 +7,7 @@
 
 #include <ctype.h>
 
-int initSocket();
-void initConnection(char *server,char *port, char* file, char* fenstergroesse);
+int initSocket(char * port);
 struct request *getRequest();
 void sendAnswer(struct answer *answ);
 void configSocket();

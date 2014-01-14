@@ -51,7 +51,7 @@ int main(int argc, char* argv[]){
 	long i;
 
 	struct answer	*erstverbindung = NULL, SqAnswer,*SqAnswerTmp = NULL;
-	struct request	fehlermeldung_erstverbindung;
+	struct request	fehlermeldung_erstverbindung, rverbindungsabbau;
 	struct window	*fensterArray = NULL;
 	struct request	*FileArray = NULL;
 	struct timeouts *timerArray = NULL;
@@ -152,10 +152,11 @@ int main(int argc, char* argv[]){
 		//dateisegment array erstellen
 		FileArray = createFileArray(Filename);
 		
-		//timer starten
-		timer = clock();
+		//schleife
 		do{
-		//schleife	
+		
+			//timer starten
+			timer = clock();
 			//wenn fenster vorhanden
 			if(getOpenWindows(fensterArray) < Window_size){
 				if((timeoutRequest = getTimeout(timerArray)) != -1){//auf timeouts prüfen
@@ -168,8 +169,24 @@ int main(int argc, char* argv[]){
 				}else if(aktuellesFile == maxFiles && getTimeout(timerArray) == -1 && verbindungBeenden == 0){
 					//es wurden alle info übermittelt
 					//baue verbindung ab
-					//erstmal nur überspringen
-					break;
+					//erst schauen ob überhaupt ein fenster frei ist
+					if((aktuellesWindow = getNextFreeWindow(fensterArray,0xFFFF)) > -1){
+						//timer einfügen
+						add_timer(timerArray,TIMEOUT,0xFFFF);
+						
+						//daten vorbereiten
+						rverbindungsabbau.ReqType = ReqClose;
+						memcpy(rverbindungsabbau.name,Filename,strlen(Filename));
+						rverbindungsabbau.name[strlen(Filename)] = '\0';
+						rverbindungsabbau.SeNr = 0xFFFF;
+						rverbindungsabbau.FlNr = 0;
+						rverbindungsabbau.fname[0] = '\0';
+
+						//daten senden
+						sendRequest(&rverbindungsabbau);
+					}else{
+						printf("Error! Server meldet: %s",errorTable[0]);//sendefenster voll! -> warte einfach mittels select() auf antworten
+					}
 				}else if(aktuellesFile < maxFiles) {
 				//keine abzuarbeiten, neue daten versenden
 					//zeitscheibe aktualisieren
@@ -183,13 +200,10 @@ int main(int argc, char* argv[]){
 					}
 				}
 			}else{
-				printf("Error! Server meldet: %s",errorTable[0]);//sendefenster voll!
-				//warte einfach mittels select() auf antworten
-				//Sleep(TIMEOUT_INT-(clock()-timer));
-				//break;//schleife verlassen
+				printf("Error! Server meldet: %s",errorTable[0]);//sendefenster voll! -> warte einfach mittels select() auf antworten
 			}
+
 			//warte auf antwort mittels select()...
-			//if antwort erhalten
 			if(antwort_erhalten(timer)){
 				SqAnswerTmp = getAnswer();
 				//workaround...da sonst falsche daten :(
@@ -198,27 +212,27 @@ int main(int argc, char* argv[]){
 				SqAnswer.SeNo = SqAnswerTmp->SeNo;
 				
 				//quittungen prüfen und dateisegment aktualisieren
-				if(SqAnswer.AnswType == AnswOk){ //welche fehler können denn auftauchen?
+				if(SqAnswer.AnswType == AnswOk){ //welche fehler können denn auftauchen und wie behandelt man sie?
 					setWindowFree(fensterArray,SqAnswer.SeNo);
 					del_timer(timerArray,SqAnswer.SeNo);
 				}else if(SqAnswer.AnswType == AnswClose){
-					verbindungBeenden = 1;
+					setWindowFree(fensterArray,SqAnswer.SeNo);
+					del_timer(timerArray,SqAnswer.SeNo);
 				}
 			
-			}else{
-				Sleep(TIMEOUT_INT - (clock()-timer));
 			}
+
 			//timer dekrementieren
 			decrement_timer(timerArray);
 
-			//test print windowarray
-			for(i=0;i<Window_size;i++){
-				printf("Fenster %d hat den Status %d\n",i,fensterArray[i].ack);
-			}
+			//warte die restliche zeit
+			Sleep(TIMEOUT_INT - (clock()-timer));
 
-
-		//solange verbindung beenden != 1
-		}while(verbindungBeenden == 0);
+			//setze abbruchbedingung
+			if(SqAnswer.AnswType == AnswClose) verbindungBeenden = 1;
+			printf("Pruefung: %d != -1 # %d != 0 # %d==0\n",getTimeout(timerArray),getOpenWindows(fensterArray),verbindungBeenden);
+		//solange keine Antwort über ReqClose oder noch offene Timeouts oder noch nicht bestätigte Nachrichten
+		}while(getTimeout(timerArray) != -1 || getOpenWindows(fensterArray) != 0 || verbindungBeenden == 0);
 
 
 

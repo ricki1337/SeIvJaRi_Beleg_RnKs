@@ -16,7 +16,7 @@
 void Usage(char *ProgName){ //How to use program
 	fprintf(stderr, "\nWrong input. How to use:\n");
 	fprintf(stderr, "\n%s [-p 1-100]\n", ProgName);
-	fprintf(stderr, "\n[-p]\tRandom packet loose percentage. (Default 0=OFF).\n");
+	fprintf(stderr, "\n[-l]\tRandom packet loose percentage. (Default 0=OFF).\n");
 	exit(1);
 }
 
@@ -28,7 +28,7 @@ int main( int argc, char *argv[]){
 			int verbindungBeendet = 0, ackWindow;
 			clock_t timer;
 			FILE *fp=NULL;
-			char *PaketverlustProzenttmp = "";
+			char *PaketverlustProzenttmp = "",*PortTmp = DEFAULT_PORT;
 
 			struct window	*fensterArray = NULL;
 			struct request	*fileArray = NULL;
@@ -43,10 +43,17 @@ int main( int argc, char *argv[]){
 					if (((argv[i][0] == '-' ) || (argv[i][0] == '/' )) && (argv[i][1] != 0) && (argv[i][2] == 0)) {
 						switch (tolower(argv[i][1])) {
 							//paketverlust
-							case 'p':	if (argv[i + 1]){
+							case 'l':	if (argv[i + 1]){
 											if (argv[i + 1][0] != '-' ){
 												Paketverlust = 1;
 												PaketverlustProzenttmp = argv[++i];
+												break;
+											}
+										}
+							//port
+							case 'p':	if (argv[i + 1]){
+											if (argv[i + 1][0] != '-' ){
+												PortTmp = argv[++i];
 												break;
 											}
 										}
@@ -59,7 +66,7 @@ int main( int argc, char *argv[]){
 			}
 
 			//socket registrieren
-			initSocket();
+			initSocket(PortTmp);
 			
 			//paketverlust überschreiben
 			if(strlen(PaketverlustProzenttmp)>0) PaketverlustProzent = atoi(PaketverlustProzenttmp);
@@ -122,13 +129,13 @@ int main( int argc, char *argv[]){
 					}else if(fensterArray[ackWindow].AnswType == AnswClose){
 						antwort.AnswType = fensterArray[ackWindow].AnswType;
 						antwort.SeNo = fensterArray[ackWindow].SqNr;
-						verbindungBeendet = 1;
-						break;
+						
 					}else{
 						antwort.AnswType = fensterArray[ackWindow].AnswType;
 						antwort.SeNo = fensterArray[ackWindow].error;
 					}
 					sendAnswer(&antwort);
+					if(antwort.AnswType == AnswClose) verbindungBeendet = 1;
 				}
 			//solange die verbindung nicht beendet wurde
 			}while(!verbindungBeendet);

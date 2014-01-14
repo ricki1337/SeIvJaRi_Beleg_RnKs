@@ -31,77 +31,9 @@ SOCKADDR_STORAGE from;
 u_long blocking = 1;
 
 
-void initConnection(char *serverIP,char *port, char* file, char* fenstergroesse){
-	struct sockaddr_in6 serversocket;
-	struct request nachricht;
-	char* reqChar;
-	int retSend, reqLen,test;
-	unsigned long addr;
-
-	WSADATA wsaData;
-	WORD wVersionRequested;
-	
-	wVersionRequested = MAKEWORD(2,1);
-	if( WSAStartup( wVersionRequested,&wsaData ) == SOCKET_ERROR ){
-		printf( "Error: WSAStartup() throws error nr. %d!\n" ,WSAGetLastError());
-		exit(-1);
-	}
-
-	
-	memset( &serversocket, 0, sizeof (serversocket));
-
-	//socket wird vom os geholt
-	mysocket = socket(AF_INET6,SOCK_DGRAM,0);
-	if(mysocket < 0){//im fehlerfall
-		printf("Error: socket() throws error nr. %d!\n",WSAGetLastError());
-		exit(-1); //ende!
-	}
-	
-	
-	serversocket.sin6_family = AF_INET6; //protokoll setzen
-		
-	//ip adresse setzen
-	if ((addr = inet_addr( serverIP )) != INADDR_NONE) {
-       /* serverIP ist eine numerische IP-Adresse. */
-       memcpy( (char *)&serversocket.sin6_addr, &addr, sizeof(addr));
-   }
-	//TODO: DNS?
-	
-	//fallback wenn serverIP == NULL -> localhost!
-	if( serverIP == NULL) serversocket.sin6_addr = in6addr_loopback;
-
-	
-	serversocket.sin6_port = htons(atoi(port)); //port setzen
-	
-	
-	//stelle verbindung her
-	if(connect(mysocket,(struct sockaddr*)&serversocket,sizeof(serversocket)) < 0){//im fehlerfall
-		printf("Error: connect() throws error nr. %d!\n",WSAGetLastError());
-		WSACleanup ();
-		exit(-1);
-	}
-
-	//schicke erste nachricht -- entfällt!
-	nachricht.FlNr = (long) fenstergroesse; //fenstergröße
-	if(file != NULL) memcpy(nachricht.fname,file,sizeof(nachricht.fname));//dateiname
-	nachricht.ReqType = ReqHello;//nachrichtentyp
-	nachricht.SeNr = 0;
-
-	//umwandeln des struct request in char*
-	reqChar = (char*) malloc(sizeof(nachricht));
-	memcpy(reqChar,&nachricht,sizeof(nachricht));
-
-	//senden der ersten nachricht
-	retSend = sendto(mysocket,reqChar,sizeof(nachricht),0,(struct sockaddr*)&serversocket,sizeof(serversocket));
-
-	//auswerten des returnwertes von send
-	if(retSend != sizeof(nachricht)){
-		printf("Error: Es wurden nicht alle Daten versand!"); //TODO!
-	}
-}
 
 //Socket init
-int initSocket(){
+int initSocket(char * port){
 	int b;
 	int val,i=0;
 	int addr_len;
@@ -150,7 +82,8 @@ int initSocket(){
 	
 	hints.ai_flags = AI_PASSIVE; //localhost
 	
-	val = getaddrinfo(NULL, server_port, &hints, &result);
+	//val = getaddrinfo(NULL, server_port, &hints, &result);
+	val = getaddrinfo(NULL, port, &hints, &result);
 	
 	if(val != 0){
 		printf( "getaddrinfo failed with error: %d\n" , val);
