@@ -188,3 +188,7 @@ void printAnswer(struct answer *ans){
 	printf("FlNr: %d\n",ans->FlNr);
 	printf("\n\n");
 }
+
+int antwort_erhalten(clock_t timer){
+	return select(ConnSocket,(fd_set*)ConnSocket,NULL,NULL,(struct timeval *)(TIMEOUT_INT - (clock()-timer)));
+}

@@ -23,7 +23,7 @@ void Usage(char *ProgName){ //How to use program
 int main( int argc, char *argv[]){
 			long i;
 			int Paketverlust = 0,PaketverlustProzent = DEFAULT_FAILURE;
-			struct request erstverbindung, *paket;
+			struct request erstverbindung, *paket, *buff;
 			struct answer antwort;
 			int verbindungBeendet = 0, ackWindow;
 			clock_t timer;
@@ -90,24 +90,16 @@ int main( int argc, char *argv[]){
 			//ack verschicken
 			sendAnswer(&antwort);
 			
-
 			//schleife
 			do {
-				//timer starten
-				timer = clock();
-				printf("Timer start: %d\n",timer);
-				//socket konfigurieren
-				configSocket(); //timeout für recvfrom anpassen
-				//schleife
-				do{
-					//daten "verlieren"...
-					if(Paketverlust && (rand() % 100) <= PaketverlustProzent) break;
-					printf("Wait for further data... ");
-					//daten empfangen
-					//memcpy(&paket,getRequest(),sizeof(struct request));
-					paket = getRequest();
-					if (paket == NULL) break;
-					printf("received more data...\n");
+				//warte auf nachricht
+				paket = getRequest();
+				//if paketverlust true
+				if(Paketverlust && (rand() % 100) <= PaketverlustProzent){
+					//überspringen und keine ack schicken
+					continue;
+				//else
+				}else{
 					//daten prüfen 
 					if(paket->ReqType == ReqData && paket->SeNr < fileArraySize){
 						//daten speichern
@@ -120,20 +112,7 @@ int main( int argc, char *argv[]){
 						getNextFreeWindow(fensterArray,paket->SeNr,AnswErr,4);
 					}
 
-					
-				//solange zeit-timer < 200
-					printf("clock: %d\n",clock());
-					printf("timer: %d\n",timer);
-				}while((clock()-timer) < (clock_t)TIMEOUT_INT);
-				
-				//timer starten
-				timer = clock();
-				//schleife
-				do{
-					//ack "verlieren"...
-					if(Paketverlust && (rand() % 100) <= PaketverlustProzent) break;
-					//noch nicht verschickte ack schicken
-					
+					//ack versenden
 					if((ackWindow = getWindowWithAck(fensterArray)) == -1) break; //window mit ack holen
 					
 					if(fensterArray[ackWindow].AnswType == AnswOk){
@@ -150,10 +129,75 @@ int main( int argc, char *argv[]){
 						antwort.SeNo = fensterArray[ackWindow].error;
 					}
 					sendAnswer(&antwort);
-				//solange zeit-timer < 200
-				}while((clock()-timer) < (clock_t)TIMEOUT_INT);
+				}
 			//solange die verbindung nicht beendet wurde
 			}while(!verbindungBeendet);
+
+
+
+			////schleife
+			//do {
+			//	//timer starten
+			//	timer = clock();
+			//	printf("Timer start: %d\n",timer);
+			//	//socket konfigurieren
+			//	configSocket(); //timeout für recvfrom anpassen
+			//	//schleife
+			//	do{
+			//		//daten "verlieren"...
+			//		if(Paketverlust && (rand() % 100) <= PaketverlustProzent) break;
+			//		printf("Wait for further data... ");
+			//		//daten empfangen
+			//		//memcpy(&paket,getRequest(),sizeof(struct request));
+			//		paket = getRequest();
+			//		if (paket == NULL) break;
+			//		printf("received more data...\n");
+			//		//daten prüfen 
+			//		if(paket->ReqType == ReqData && paket->SeNr < fileArraySize){
+			//			//daten speichern
+			//			memcpy(&fileArray[paket->SeNr],paket,sizeof(struct answer));
+			//			//quittung markieren
+			//			getNextFreeWindow(fensterArray,paket->SeNr,AnswOk,-1);
+			//		}else if(paket->ReqType == ReqClose){
+			//			getNextFreeWindow(fensterArray,paket->SeNr,AnswClose,-1);
+			//		}else{
+			//			getNextFreeWindow(fensterArray,paket->SeNr,AnswErr,4);
+			//		}
+
+			//		
+			//	//solange zeit-timer < 200
+			//		printf("clock: %d\n",clock());
+			//		printf("timer: %d\n",timer);
+			//	}while((clock()-timer) < (clock_t)TIMEOUT_INT);
+			//	
+			//	//timer starten
+			//	timer = clock();
+			//	//schleife
+			//	do{
+			//		//ack "verlieren"...
+			//		if(Paketverlust && (rand() % 100) <= PaketverlustProzent) break;
+			//		//noch nicht verschickte ack schicken
+			//		
+			//		if((ackWindow = getWindowWithAck(fensterArray)) == -1) break; //window mit ack holen
+			//		
+			//		if(fensterArray[ackWindow].AnswType == AnswOk){
+			//			antwort.AnswType = fensterArray[ackWindow].AnswType;	
+			//			antwort.SeNo = fensterArray[ackWindow].SqNr;	
+			//		//ist verbindung beendet?
+			//		}else if(fensterArray[ackWindow].AnswType == AnswClose){
+			//			antwort.AnswType = fensterArray[ackWindow].AnswType;
+			//			antwort.SeNo = fensterArray[ackWindow].SqNr;
+			//			verbindungBeendet = 1;
+			//			break;
+			//		}else{
+			//			antwort.AnswType = fensterArray[ackWindow].AnswType;
+			//			antwort.SeNo = fensterArray[ackWindow].error;
+			//		}
+			//		sendAnswer(&antwort);
+			//	//solange zeit-timer < 200
+			//	}while((clock()-timer) < (clock_t)TIMEOUT_INT);
+			////solange die verbindung nicht beendet wurde
+			//}while(!verbindungBeendet);
 			
 			//socket freigeben
 			exitSocket();

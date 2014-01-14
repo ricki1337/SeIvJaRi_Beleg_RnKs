@@ -50,7 +50,7 @@ int main(int argc, char* argv[]){
 	
 	long i;
 
-	struct answer	*erstverbindung = NULL, *SqAnswer;
+	struct answer	*erstverbindung = NULL, SqAnswer,*SqAnswerTmp = NULL;
 	struct request	fehlermeldung_erstverbindung;
 	struct window	*fensterArray = NULL;
 	struct request	*FileArray = NULL;
@@ -151,77 +151,150 @@ int main(int argc, char* argv[]){
 		fensterArray = createWindowArray(Window_size);
 		//dateisegment array erstellen
 		FileArray = createFileArray(Filename);
-
-		//schleife
+		
+		//timer starten
+		timer = clock();
 		do{
-			//senden
-			//timer starten
-			timer = clock();
-
-			
-			//schleife 
-			do{
-				//wenn fenster vorhanden
-				if(getOpenWindows(fensterArray) < Window_size){
-					if((timeoutRequest = getTimeout(timerArray)) != -1){//auf timeouts prüfen
-						//timer löschen
-						timerArray = del_timer(timerArray,FileArray[timeoutRequest].SeNr);
+		//schleife	
+			//wenn fenster vorhanden
+			if(getOpenWindows(fensterArray) < Window_size){
+				if((timeoutRequest = getTimeout(timerArray)) != -1){//auf timeouts prüfen
+					//timer löschen
+					timerArray = del_timer(timerArray,FileArray[timeoutRequest].SeNr);
+					//timer einfügen
+					timerArray = add_timer(timerArray,TIMEOUT,FileArray[timeoutRequest].SeNr);
+					//daten mit timeout nochmals versenden
+					sendRequest(&FileArray[timeoutRequest]);
+				}else if(aktuellesFile == maxFiles && getTimeout(timerArray) == -1 && verbindungBeenden == 0){
+					//es wurden alle info übermittelt
+					//baue verbindung ab
+					//erstmal nur überspringen
+					break;
+				}else if(aktuellesFile < maxFiles) {
+				//keine abzuarbeiten, neue daten versenden
+					//zeitscheibe aktualisieren
+					if((aktuellesWindow = getNextFreeWindow(fensterArray,aktuellesFile)) > -1){
 						//timer einfügen
-						timerArray = add_timer(timerArray,TIMEOUT,FileArray[timeoutRequest].SeNr);
-						//daten mit timeout nochmals versenden
-						sendRequest(&FileArray[timeoutRequest]);
-					}else if(aktuellesFile == maxFiles && getTimeout(timerArray) == -1 && verbindungBeenden == 0){
-						//es wurden alle info übermittelt
-						//baue verbindung ab
-						//erstmal nur überspringen
-						break;
-					}else if(aktuellesFile < maxFiles) {
-					//keine abzuarbeiten, neue daten versenden
-						//zeitscheibe aktualisieren
-						if((aktuellesWindow = getNextFreeWindow(fensterArray,aktuellesFile)) > -1){
-							//timer einfügen
-							add_timer(timerArray,TIMEOUT,FileArray[aktuellesFile].SeNr);
-							//daten senden
-							sendRequest(&FileArray[aktuellesFile]);
-							//nächstes file
-							aktuellesFile++;
-						}
+						add_timer(timerArray,TIMEOUT,FileArray[aktuellesFile].SeNr);
+						//daten senden
+						sendRequest(&FileArray[aktuellesFile]);
+						//nächstes file
+						aktuellesFile++;
 					}
-				}else{
-					printf("Error! Server meldet: %s",errorTable[0]);//sendefenster voll!
-					
-					Sleep(TIMEOUT_INT-(clock()-timer));
-					//break;//schleife verlassen
 				}
-			//solange zeit-timer < 200
-			}while((clock()-timer) < (clock_t)TIMEOUT_INT && (aktuellesFile-1) <= maxFiles);
-			
-			//empfangen
-			configSocket(); //timeout für recvfrom anpassen
-			//timer starten
-			timer = clock();
-			do{
-				printf("Warte auf antwort");
-				//daten empfangen
-				SqAnswer = getAnswer();
-				if (SqAnswer == NULL) break;
-				printf("habe antwort...");
+			}else{
+				printf("Error! Server meldet: %s",errorTable[0]);//sendefenster voll!
+				//warte einfach mittels select() auf antworten
+				//Sleep(TIMEOUT_INT-(clock()-timer));
+				//break;//schleife verlassen
+			}
+			//warte auf antwort mittels select()...
+			//if antwort erhalten
+			if(antwort_erhalten(timer)){
+				SqAnswerTmp = getAnswer();
+				//workaround...da sonst falsche daten :(
+				SqAnswer.AnswType = SqAnswerTmp->AnswType;
+				SqAnswer.FlNr = SqAnswerTmp->FlNr;
+				SqAnswer.SeNo = SqAnswerTmp->SeNo;
+				
 				//quittungen prüfen und dateisegment aktualisieren
-				wa = SqAnswer->AnswType;
-				if(wa == AnswOk){ //welche fehler können denn auftauchen?
-					setWindowFree(fensterArray,SqAnswer->SeNo);
-					del_timer(timerArray,SqAnswer->SeNo);
-				}else if(wa == AnswClose){
+				if(SqAnswer.AnswType == AnswOk){ //welche fehler können denn auftauchen?
+					setWindowFree(fensterArray,SqAnswer.SeNo);
+					del_timer(timerArray,SqAnswer.SeNo);
+				}else if(SqAnswer.AnswType == AnswClose){
 					verbindungBeenden = 1;
 				}
-				//timer decrementieren
-				decrement_timer(timerArray);
-				printf("clock: %d",clock());
-					printf("timer: %d",timer);
-			}while((clock()-timer) < (clock_t)TIMEOUT_INT);
-		//solange dateisegment nicht komplett quittiert
-		//&& getOpenWindows(fensterArray) != 0
-		}while(verbindungBeenden == 0);// && getTimeout(timerArray) != -1 && (aktuellesFile-1) != maxFiles);
+			
+			}else{
+				Sleep(TIMEOUT_INT - (clock()-timer));
+			}
+			//timer dekrementieren
+			decrement_timer(timerArray);
+
+			//test print windowarray
+			for(i=0;i<Window_size;i++){
+				printf("Fenster %d hat den Status %d\n",i,fensterArray[i].ack);
+			}
+
+
+		//solange verbindung beenden != 1
+		}while(verbindungBeenden == 0);
+
+
+
+
+
+
+		////schleife
+		//do{
+		//	//senden
+		//	//timer starten
+		//	timer = clock();
+
+		//	
+		//	//schleife 
+		//	do{
+		//		//wenn fenster vorhanden
+		//		if(getOpenWindows(fensterArray) < Window_size){
+		//			if((timeoutRequest = getTimeout(timerArray)) != -1){//auf timeouts prüfen
+		//				//timer löschen
+		//				timerArray = del_timer(timerArray,FileArray[timeoutRequest].SeNr);
+		//				//timer einfügen
+		//				timerArray = add_timer(timerArray,TIMEOUT,FileArray[timeoutRequest].SeNr);
+		//				//daten mit timeout nochmals versenden
+		//				sendRequest(&FileArray[timeoutRequest]);
+		//			}else if(aktuellesFile == maxFiles && getTimeout(timerArray) == -1 && verbindungBeenden == 0){
+		//				//es wurden alle info übermittelt
+		//				//baue verbindung ab
+		//				//erstmal nur überspringen
+		//				break;
+		//			}else if(aktuellesFile < maxFiles) {
+		//			//keine abzuarbeiten, neue daten versenden
+		//				//zeitscheibe aktualisieren
+		//				if((aktuellesWindow = getNextFreeWindow(fensterArray,aktuellesFile)) > -1){
+		//					//timer einfügen
+		//					add_timer(timerArray,TIMEOUT,FileArray[aktuellesFile].SeNr);
+		//					//daten senden
+		//					sendRequest(&FileArray[aktuellesFile]);
+		//					//nächstes file
+		//					aktuellesFile++;
+		//				}
+		//			}
+		//		}else{
+		//			printf("Error! Server meldet: %s",errorTable[0]);//sendefenster voll!
+		//			
+		//			Sleep(TIMEOUT_INT-(clock()-timer));
+		//			//break;//schleife verlassen
+		//		}
+		//	//solange zeit-timer < 200
+		//	}while((clock()-timer) < (clock_t)TIMEOUT_INT && (aktuellesFile-1) <= maxFiles);
+		//	
+		//	//empfangen
+		//	configSocket(); //timeout für recvfrom anpassen
+		//	//timer starten
+		//	timer = clock();
+		//	do{
+		//		printf("Warte auf antwort");
+		//		//daten empfangen
+		//		SqAnswer = getAnswer();
+		//		if (SqAnswer == NULL) break;
+		//		printf("habe antwort...");
+		//		//quittungen prüfen und dateisegment aktualisieren
+		//		wa = SqAnswer->AnswType;
+		//		if(wa == AnswOk){ //welche fehler können denn auftauchen?
+		//			setWindowFree(fensterArray,SqAnswer->SeNo);
+		//			del_timer(timerArray,SqAnswer->SeNo);
+		//		}else if(wa == AnswClose){
+		//			verbindungBeenden = 1;
+		//		}
+		//		//timer decrementieren
+		//		decrement_timer(timerArray);
+		//		printf("clock: %d",clock());
+		//			printf("timer: %d",timer);
+		//	}while((clock()-timer) < (clock_t)TIMEOUT_INT);
+		////solange dateisegment nicht komplett quittiert
+		////&& getOpenWindows(fensterArray) != 0
+		//}while(verbindungBeenden == 0);// && getTimeout(timerArray) != -1 && (aktuellesFile-1) != maxFiles);
 	}//request erstverbindung korrekt ende
 
 	
