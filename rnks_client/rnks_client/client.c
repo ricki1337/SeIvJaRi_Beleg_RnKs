@@ -16,7 +16,7 @@
 void Usage(char *ProgName){ //How to use program
 	fprintf(stderr, "\nKommandoparameter:\n\n");
 	fprintf(stderr, "[-l xxx]\tZuf\x84lliger Paketverlust in Prozent. (Standard: 0=OFF).\n");
-	fprintf(stderr, "[-p xxx]\tPort f\x81\br Socket bind. (Standard: %s)\n",DEFAULT_PORT);	
+	fprintf(stderr, "[-p xxx]\tPort f\x81 \br Socket bind. (Standard: %s)\n",DEFAULT_PORT);	
 	exit(1);
 }
 
@@ -216,7 +216,7 @@ int main( int argc, char *argv[]){
 				//datei zusammensetzen und speichern
 				if (saveFile(fp,fileArray,(fileArraySize/PufferSize)))  {
 					closeFile(fp);
-					printf("Datei \x81\bbermittelt und gespeichert.\nBeende...\n");
+					printf("Datei \x81 \bbermittelt und gespeichert.\nBeende...\n");
 					exit(1);
 					}
 				} 
