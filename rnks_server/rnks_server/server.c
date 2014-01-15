@@ -75,7 +75,7 @@ int main(int argc, char* argv[]){
 
 	FILE *f;
 	int Portint;
-	int länge,i,zeichen=0,nullen_aufgefüllt=0, doppelpunktzählerzähler=0;
+	int länge,zeichen=0,nullen_aufgefüllt=0, doppelpunktzählerzähler=0;
 
 	//argumente auswerten
 	if (argc > 1) {
@@ -159,7 +159,7 @@ int main(int argc, char* argv[]){
 					if (Empfaenger[i]==':' && Empfaenger[i+1]==':') {nullen_aufgefüllt=1;}
 				}
 
-					if (doppelpunktzählerzähler < 7 && nullen_aufgefüllt != 1){fprintf(stderr, P_MESSAGE_13); exit(1);}
+				if (doppelpunktzählerzähler < 7 && nullen_aufgefüllt != 1){fprintf(stderr, P_MESSAGE_13); exit(1);}}
 
 	//fenstergröße setzen
 	Window_size = DEFAULT_WINDOW;
