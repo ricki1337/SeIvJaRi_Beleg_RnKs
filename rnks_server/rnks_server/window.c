@@ -24,7 +24,7 @@ int getOpenWindows(struct window* windowArray){
 	for(i=0;i<windowSize;i++)
 		if(windowArray[i].ack == 0)
 			OpenWindows++;
-	printf("Anz geoeffnete Fenster: %d\n",OpenWindows);
+	//printf("Anz geoeffnete Fenster: %d\n",OpenWindows);
 	return OpenWindows;	
 }
 

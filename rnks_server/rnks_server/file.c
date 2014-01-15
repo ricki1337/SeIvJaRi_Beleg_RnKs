@@ -50,17 +50,18 @@ void closeFile(FILE *fp){
 	if(fp != NULL) fclose(fp);
 }
 
-struct request* createFileArray(char *fileName){
+struct request* createFileArray(char *fileName,int *filearrysize){
 	int i=0,buf,tmpSize; //faktor für pos berechnung
 	struct request *FileArray;
 	char *tmp;
 	FILE *fp=NULL;
 	
+	
 	buf = (int)PufferSize;
 	if(fp = openFile(fileName)){
 
 		FileArray = (struct request *) malloc(((int)(fileInfo->st_size/buf)+1)*sizeof(struct request));
-
+		
 		while(i < ((int)(fileInfo->st_size/buf)+1)){
 			tmp = getChars(fp,buf, i*buf);
 			
@@ -75,7 +76,10 @@ struct request* createFileArray(char *fileName){
 			FileArray[i].fname[strlen(fileName)] = '\0';
 			i++;
 		}
+		
 		closeFile(fp);
+		
+		*filearrysize=i;//hält global die array größe [user ist die funktion arraychaos(...)]
 		return FileArray;
 	}
 }
