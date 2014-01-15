@@ -219,7 +219,7 @@ int main( int argc, char *argv[]){
 					exit(1);
 					}
 				} 
-				
+			if(fp != NULL) closeFile(fp);	
 			/*printf("Error opening file %s for writing!\n",fileArray->fname);
 			exit(-1);*/				
 
