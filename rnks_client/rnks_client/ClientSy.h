@@ -4,7 +4,6 @@
 #include <string.h>
 #include <errno.h>
 #include "data.h"
-
 #include <ctype.h>
 
 int initSocket(char * port);

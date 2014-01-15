@@ -15,6 +15,7 @@
 #include "toUdp.h"
 #include "data.h"
 
+
 void Usage(char *ProgName){ //How to use program
 	fprintf(stderr, P_MESSAGE_1);
 	fprintf(stderr, P_MESSAGE_6, ProgName);
@@ -58,7 +59,8 @@ int main(int argc, char* argv[]){
 	int				timeoutRequest;
 	int				aktuellesFile = 0, maxFiles=0;
 	int				aktuellesWindow = 0;
-
+	int	filearraysize; //Anzahl der Pakete,wird benötigt um Paketreihenfolge zu vertauschen, wird in createFilearry definiert
+	int *sendeReihenfolgearray;
 	int reihenfolgeVertauschen = 0;
 	int Paketverlust = 0;
 	char *Empfaenger = DEFAULT_SERVER;
@@ -73,9 +75,13 @@ int main(int argc, char* argv[]){
 
 	clock_t timer;
 
+<<<<<<< HEAD
 	FILE *f;
 	int Portint;
 	int länge,zeichen=0,nullen_aufgefüllt=0, doppelpunktzählerzähler=0;
+=======
+	srand(time(NULL)); //seeden des randomgenerators
+>>>>>>> Reihenfolgevertauschen, UserInfo
 
 	//argumente auswerten
 	if (argc > 1) {
@@ -188,7 +194,10 @@ int main(int argc, char* argv[]){
 		//fenster einrichten
 		fensterArray = createWindowArray(Window_size);
 		//dateisegment array erstellen
-		FileArray = createFileArray(Filename);
+		FileArray = createFileArray(Filename,&filearraysize);
+		//sendeReihenfolge erstellen in abhänigkeit von "int reihenfolgeVertauschen"
+		sendeReihenfolgearray= (int*) malloc(sizeof(int)*filearraysize);
+		sendeReihenfolge(sendeReihenfolgearray,filearraysize,reihenfolgeVertauschen);
 		
 		//schleife
 		do{
@@ -228,11 +237,11 @@ int main(int argc, char* argv[]){
 				}else if(aktuellesFile < maxFiles) {
 				//keine abzuarbeiten, neue daten versenden
 					//zeitscheibe aktualisieren
-					if((aktuellesWindow = getNextFreeWindow(fensterArray,aktuellesFile)) > -1){
+					if((aktuellesWindow = getNextFreeWindow(fensterArray,sendeReihenfolgearray[aktuellesFile])) > -1){
 						//timer einfügen
-						add_timer(timerArray,TIMEOUT,FileArray[aktuellesFile].SeNr);
+						add_timer(timerArray,TIMEOUT,FileArray[sendeReihenfolgearray[aktuellesFile]].SeNr);
 						//daten senden
-						sendRequest(&FileArray[aktuellesFile]);
+						sendRequest(&FileArray[sendeReihenfolgearray[aktuellesFile]]);
 						//nächstes file
 						aktuellesFile++;
 					}
