@@ -15,3 +15,8 @@
 #define P_MESSAGE_8 " port\t\tPort on which to connect. (default: %s)\n"
 #define P_MESSAGE_9 " file\t\tFile to send. (default: empty)\n"
 #define P_MESSAGE_10 " window_size\t\twindow size of Selective Repeat Protocol (maximum: 10).\n"
+
+
+#define P_MESSAGE_11 "invalid Port number (valid numbers: 49152 - 65535)\n"
+#define P_MESSAGE_12 "txt file does not exist / is not readable\n"
+#define P_MESSAGE_13 "Wrong Ip Format"

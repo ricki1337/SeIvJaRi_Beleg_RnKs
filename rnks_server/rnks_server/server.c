@@ -73,6 +73,10 @@ int main(int argc, char* argv[]){
 
 	clock_t timer;
 
+	FILE *f;
+	int Portint;
+	int länge,i,zeichen=0,nullen_aufgefüllt=0, doppelpunktzählerzähler=0;
+
 	//argumente auswerten
 	if (argc > 1) {
 				for (i = 1; i < argc; i++) {
@@ -125,6 +129,38 @@ int main(int argc, char* argv[]){
 					}else Usage(argv[0]);
 				}
 			} else Usage(argv[0]); 
+	
+//Portnummer prüfen
+	Portint = atoi(Port); 
+	if (Portint<49152 || Portint>65535){
+		fprintf(stderr, P_MESSAGE_11);
+		exit(1);}
+
+	//prüfen ob txt Datei existiert
+    f = fopen(Filename, "r");
+	if (f == NULL){ 
+		fprintf(stderr, P_MESSAGE_12);
+		exit(1);}
+
+	//ipv6 adressformat prüfen
+	if (Empfaenger == "::" || Empfaenger == "::1" || Empfaenger == NULL )Empfaenger = NULL;
+		else{
+
+				länge = strlen(Empfaenger);
+
+				if (länge > 39){fprintf(stderr, P_MESSAGE_13); exit(1);}
+
+				for (i=0;i<länge;i++){
+					zeichen++;
+					if (Empfaenger[i]==':') zeichen=0, doppelpunktzählerzähler++;
+
+					if (zeichen>4){fprintf(stderr, P_MESSAGE_13); exit(1);}
+
+					if (Empfaenger[i]==':' && Empfaenger[i+1]==':') {nullen_aufgefüllt=1;}
+				}
+
+					if (doppelpunktzählerzähler < 7 && nullen_aufgefüllt != 1){fprintf(stderr, P_MESSAGE_13); exit(1);}
+
 	//fenstergröße setzen
 	Window_size = DEFAULT_WINDOW;
 	if(tmpWindow_size != "")
