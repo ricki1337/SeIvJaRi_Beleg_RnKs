@@ -49,7 +49,7 @@ int saveFile(FILE *fp, struct request* FileAry, int sizeFA) {
 
 	for (i=0;i<=(sizeFA);i++) {
 		//alternativ zeichenweiße....
-		if (c=fwrite(FileAry[i].name,sizeof(char),(FileAry->FlNr)-1,fp)==NULL)
+		if (c=fwrite(FileAry[i].name,sizeof(char),FileAry[i].FlNr,fp)==NULL)
 			return 0;
 		}
 	return 1;

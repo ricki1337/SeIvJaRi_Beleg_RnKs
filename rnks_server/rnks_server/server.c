@@ -75,13 +75,12 @@ int main(int argc, char* argv[]){
 
 	clock_t timer;
 
-<<<<<<< HEAD
 	FILE *f;
 	int Portint;
 	int länge,zeichen=0,nullen_aufgefüllt=0, doppelpunktzählerzähler=0;
-=======
+
 	srand(time(NULL)); //seeden des randomgenerators
->>>>>>> Reihenfolgevertauschen, UserInfo
+//	 Reihenfolgevertauschen, UserInfo
 
 	//argumente auswerten
 	if (argc > 1) {
@@ -359,6 +358,6 @@ int main(int argc, char* argv[]){
 
 	
 	exitSocket();
-	scanf("%d");
+	
 	return EXIT_SUCCESS;
 }

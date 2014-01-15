@@ -29,16 +29,16 @@ int getFileSize(){
 char* getChars(FILE *fp,int anzZeichen, int pos){
 	int anzLsbZeichen=0;
 	char* buff;
-	anzZeichen--;//um 1 decrementieren um \0 anzufügen
+	//anzZeichen--;//um 1 decrementieren um \0 anzufügen
 	if(fp != NULL){ //ist dateizeiger geöffnet?
 		if(pos > fileInfo->st_size) return NULL;//existiert die gesuchte pos?
 		if((anzLsbZeichen = fileInfo->st_size-(pos)) < anzZeichen ) anzZeichen = anzLsbZeichen;//wie viele zeichen können überhaupt noch gelesen werden?
 			
-		buff = (char*) malloc((anzZeichen+1)*sizeof(char));//puffer anpassen
+		buff = (char*) malloc((anzZeichen)*sizeof(char));//puffer anpassen
 		//lese die zeichen...
 		fseek(fp,pos,SEEK_SET);//gehe an die richtige pos
 		fread(buff,sizeof(char),anzZeichen,fp);//lese
-		buff[anzZeichen] = '\0'; //stringende anfügen
+		//buff[anzZeichen] = '\0'; //stringende anfügen
 		return buff;//gib den char* zurück
 		
 	}
