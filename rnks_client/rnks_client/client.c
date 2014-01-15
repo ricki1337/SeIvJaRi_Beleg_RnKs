@@ -15,7 +15,8 @@
 
 void Usage(char *ProgName){ //How to use program
 	fprintf(stderr, "\nKommandoparameter:\n");
-fprintf(stderr, " port\t\tPort on which to bind. (default: %s)\n",DEFAULT_PORT);	exit(1);
+	fprintf(stderr, "\n[-l]\tZuf\x84lliger Paketverlust in Prozent. (Standard 0=OFF).\n");
+	fprintf(stderr, " port\t\tPort on which to bind. (default: %s)\n",DEFAULT_PORT);	exit(1);
 }
 
 int main( int argc, char *argv[]){
