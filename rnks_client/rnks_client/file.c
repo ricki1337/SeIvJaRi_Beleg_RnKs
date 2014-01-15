@@ -9,13 +9,13 @@
 	- schließen der file
 */
 
-int openFile(char *fileName, FILE *fp){
-	fp = fopen(fileName,"w+"); //datei zum schreiben öffnen
+FILE* openFile(char *fileName, FILE **fp){
+	*fp = fopen(fileName,"w+t"); //datei zum schreiben öffnen
 	if(fp == NULL) {
 		printf("Error: Could not open file %s!\n",fileName);
 			return 0; //datei konnte nicht geöffnet werden
 		}
-	return 1;
+	return *fp;
 }
 
 
@@ -43,14 +43,13 @@ struct request* createFileArray(int filesize){
 }
 
 //Save files from FileArray to local file
-int saveFile(FILE *fp, struct request *FileArray, int sizeFA) {
+int saveFile(FILE *fp, struct request* FileAry, int sizeFA) {
 	//char buf[PufferSize];
 	int i,c;
 
-	for (i=0;i<sizeFA;i++) {
-		//alternativ zeichenweiße, da mögliche mehrinhalte beim auffüllen des Puffers fileArray.name?
-		//noch zu testen...
-		if (c=fputs(FileArray[i].name,fp)==EOF)
+	for (i=0;i<=(sizeFA);i++) {
+		//alternativ zeichenweiße....
+		if (c=fputs(FileAry[i].name,fp)==EOF)
 			return 0;
 		}
 	return 1;

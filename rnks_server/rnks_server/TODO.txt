@@ -15,6 +15,7 @@ ws2_32.lib <- muss dort eingefügt werden
 - parameter prüfen +jakob
 - ipv6 adressformate beachten (::1 für localhost etc.) +jakob
 - verbindung auf dns basis +sepp
+- letztes Datenpaket wird mit sonderzeichen aufgefüllt (Filearray->name) -> Wandern mit in das Client file...
 
 
 ##Test
