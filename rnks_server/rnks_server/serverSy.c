@@ -4,11 +4,13 @@
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
-#include "data.h"
+//#include "data.h" //wurde hier auskommentiert da sie schon mit Userinforamtion.c und .h importiert wird. Sonst fehler wegen NeuDefinition
 #include "toUdp.h"
 #include "file.h"
 #include <ctype.h>
 #include <time.h>
+#include "UserInformation.h"
+
 
 /*static struct request req;*/
 struct request req;
@@ -65,7 +67,7 @@ void initConnection(char *empfIP,char *port, char* file, int fenstergroesse){
 	
 	remoteAddr.sin6_port = htons(atoi(port)); //port setzen
 	
-	
+	UserInformation(1,NULL,NULL);
 	//stelle verbindung her
 	if(connect(ConnSocket,(struct sockaddr*)&remoteAddr,sizeof(remoteAddr)) < 0){//im fehlerfall
 		printf("Error: connect() throws error nr. %d!\n",WSAGetLastError());
@@ -88,7 +90,7 @@ void initConnection(char *empfIP,char *port, char* file, int fenstergroesse){
 	reqChar = (char*) malloc(sizeof(nachricht));
 	memcpy(reqChar,&nachricht,sizeof(nachricht));
 	sizeof(nachricht);
-	printRequest(&nachricht);
+	UserInformation(2,&nachricht,NULL);
 
 	//senden der ersten nachricht
 	retSend = sendto(ConnSocket,reqChar,sizeof(nachricht),0,(struct sockaddr*)&remoteAddr,sizeof(remoteAddr));
@@ -103,13 +105,14 @@ void initConnection(char *empfIP,char *port, char* file, int fenstergroesse){
 void sendRequest(struct request *paket){
 	int sendtostat;
 	char* reqChar;
-	printRequest(paket);
+
 	reqChar = (char*) malloc(sizeof(struct request));
 	memcpy(reqChar,paket,sizeof(struct request));
 	sendtostat = sendto(ConnSocket, reqChar,sizeof(struct request),0,(struct sockaddr *) &remoteAddr,sizeof(remoteAddr));
 	if (sendtostat == SOCKET_ERROR) {
 		fprintf(stderr, "send() failed: error %d\n",WSAGetLastError());
 	}
+	UserInformation(4,paket,NULL);
 }
 
 struct answer* getAnswer(){
@@ -119,10 +122,9 @@ struct answer* getAnswer(){
 	int remoteAddrSize = sizeof(struct sockaddr_in6);
 	char * reqchar;
 	/* Receive a message from a socket */
-	printf( "vor recvfrom\n" );
+	
 	reqchar = (char *) malloc(sizeof(req));
 	recvcc = recvfrom(ConnSocket, reqchar, sizeof (req), 0, (struct sockaddr *) &remoteAddr, &remoteAddrSize);
-	printf("ans recvfrom: %d\n",recvcc);
 	memcpy(&req,reqchar,sizeof(req));
 
 	if(WSAGetLastError() == 10035) return NULL;
@@ -141,7 +143,7 @@ struct answer* getAnswer(){
 		exit(-1);
 	}
 
-	printAnswer(&req);
+	UserInformation(3,NULL,&req);
 
 	return (&req);
 }
@@ -159,25 +161,27 @@ int exitSocket() {
 	return(0);
 }
 
-void printRequest(struct request *req){
-	printf("\n\n");
-	printf("\t##Request\n");
-	printf("ReqType: %c\n",req->ReqType);
-	printf("SqNr: %d\n",req->SeNr);
-	printf("FlNr: %d\n",req->FlNr);
-	printf("fname: %s\n",req->fname);
-	printf("name: %s\n",req->name);
-	printf("\n\n");
-}
-void printAnswer(struct answer *ans){
-	printf("\n\n");
-	printf("\t##Answer\n");
-	printf("AnswType: %c\n",ans->AnswType);
-	printf("SqNr: %d\n",ans->SeNo);
-	printf("FlNr: %d\n",ans->FlNr);
-	printf("\n\n");
-}
-
 int antwort_erhalten(clock_t timer){
 	return select(ConnSocket,(fd_set*)ConnSocket,NULL,NULL,(struct timeval *)(TIMEOUT_INT - (clock()-timer)));
+}
+
+void sendeReihenfolge(int *array,int size,int unordnung){
+	int i=0;
+	
+	for(i=0;i<size;i++){//array sortiert füllen
+		array[i]=i;
+	}
+	
+	if(unordnung){
+	//array in zufällige reihfolge bringen
+		for(i=0;i<size;i++){
+				int xrand=rand() % size; //Wertebereich des array
+				int tmp;
+		
+				tmp=array[xrand];
+
+				array[xrand]=array[i];
+				array[i]=tmp;
+			}
+	}
 }

@@ -85,6 +85,7 @@
     <ClInclude Include="serverSy.h" />
     <ClInclude Include="Timer.h" />
     <ClInclude Include="toUdp.h" />
+    <ClInclude Include="UserInformation.h" />
     <ClInclude Include="window.h" />
   </ItemGroup>
   <ItemGroup>
@@ -93,6 +94,7 @@
     <ClCompile Include="server.c" />
     <ClCompile Include="serverSy.c" />
     <ClCompile Include="Timer.c" />
+    <ClCompile Include="UserInformation.c" />
     <ClCompile Include="window.c" />
   </ItemGroup>
   <ItemGroup>
