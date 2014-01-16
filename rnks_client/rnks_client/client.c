@@ -33,6 +33,7 @@ int main( int argc, char *argv[]){
 			struct window	*fensterArray = NULL;
 			struct request	*fileArray = NULL;
 			unsigned int fileArraySize = 0;
+			int zufallszahl;
 
 			//zufallszahl für paketverlust
 			srand(time(0));
@@ -102,8 +103,8 @@ int main( int argc, char *argv[]){
 				//warte auf nachricht
 				paket = getRequest();
 				//if paketverlust true
-				if(Paketverlust && ((rand()) % 100) <= PaketverlustProzent){
-					//überspringen und keine ack schicken
+				zufallszahl= rand();
+				if(Paketverlust != 0 && (zufallszahl % 100) <= PaketverlustProzent){					//überspringen und keine ack schicken
 					continue;
 				//else
 				}else{
