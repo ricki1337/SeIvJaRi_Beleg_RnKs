@@ -16,7 +16,7 @@
 struct request req;
 
 SOCKET ConnSocket;
-
+fd_set myset;
 /*Declare socket address "remote" as static*/
 static struct sockaddr_in6 remoteAddr;
 
@@ -170,6 +170,8 @@ void initConnection(char *empfIP,char *port, char* file, int fenstergroesse){
 	if(retSend != sizeof(nachricht)){
 		printf("Error: Es wurden nicht alle Daten versand!"); //TODO!
 	}
+	FD_ZERO(&myset);
+	FD_SET(ConnSocket,&myset);
 }
 
 
@@ -233,7 +235,14 @@ int exitSocket() {
 }
 
 int antwort_erhalten(clock_t timer){
-	return select(ConnSocket,(fd_set*)ConnSocket,NULL,NULL,(struct timeval *)(TIMEOUT_INT - (clock()-timer)));
+	int ret;
+	struct timeval tval;
+	tval.tv_sec = 0;
+	tval.tv_usec = ((clock_t)TIMEOUT_INT - (clock()-timer))<0?0:(clock()-timer);
+	printf("Sec: %d\n uSec: %d",tval.tv_sec,tval.tv_usec);
+	ret = select(ConnSocket+1,&myset,NULL,NULL,&tval);
+	if(ret < 0) printf("Error: select throws error nr. %d\n",WSAGetLastError());
+	return ret;
 }
 
 void sendeReihenfolge(int *array,int size,int unordnung){

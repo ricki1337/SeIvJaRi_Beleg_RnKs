@@ -102,7 +102,7 @@ int main( int argc, char *argv[]){
 				//warte auf nachricht
 				paket = getRequest();
 				//if paketverlust true
-				if(Paketverlust && (rand() % 100) <= PaketverlustProzent){
+				if(Paketverlust && ((rand()) % 100) <= PaketverlustProzent){
 					//überspringen und keine ack schicken
 					continue;
 				//else
@@ -217,14 +217,14 @@ int main( int argc, char *argv[]){
 				if (saveFile(fp,fileArray,(fileArraySize/PufferSize)))  {
 					closeFile(fp);
 					printf("Datei \x81 \bbermittelt und gespeichert.\nBeende...\n");
-					exit(1);
+					//exit(1);
 					}
 				} 
 			if(fp != NULL) closeFile(fp);	
 			/*printf("Error opening file %s for writing!\n",fileArray->fname);
 			exit(-1);*/				
 
-			printf("Error: Fehler beim Schreiben der Daten in die Datei!\n");
-			exit(-1);
-	
+			//printf("Error: Fehler beim Schreiben der Daten in die Datei!\n");
+			//exit(-1);
+			return EXIT_SUCCESS;
 }

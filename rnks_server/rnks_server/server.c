@@ -71,7 +71,7 @@ int main(int argc, char* argv[]){
 	char *tmpWindow_size = "";
 	int Window_size;
 	unsigned char wa;
-	int tmp,tmp1, verbindungBeenden=0;
+	int tmp,tmp1, verbindungBeenden=0,testtimer;
 
 	clock_t timer;
 
@@ -179,7 +179,7 @@ int main(int argc, char* argv[]){
 	
 	//workaround 
 	wa = erstverbindung->AnswType;
-	maxFiles = erstverbindung->SeNo/(PufferSize-1)+1;
+	maxFiles = (int)(erstverbindung->SeNo/PufferSize)+1;
 	//antwort prüfen
 	//if(erstverbindung->AnswType != AnswHello){//falscher reqtype
 	if(wa != AnswHello){//falscher reqtype
@@ -218,7 +218,7 @@ int main(int argc, char* argv[]){
 					//erst schauen ob überhaupt ein fenster frei ist
 					if((aktuellesWindow = getNextFreeWindow(fensterArray,0xFFFF)) > -1){
 						//timer einfügen
-						add_timer(timerArray,TIMEOUT,0xFFFF);
+						timerArray = add_timer(timerArray,TIMEOUT,0xFFFF);
 						
 						//daten vorbereiten
 						rverbindungsabbau.ReqType = ReqClose;
@@ -238,7 +238,7 @@ int main(int argc, char* argv[]){
 					//zeitscheibe aktualisieren
 					if((aktuellesWindow = getNextFreeWindow(fensterArray,sendeReihenfolgearray[aktuellesFile])) > -1){
 						//timer einfügen
-						add_timer(timerArray,TIMEOUT,FileArray[sendeReihenfolgearray[aktuellesFile]].SeNr);
+						timerArray = add_timer(timerArray,TIMEOUT,FileArray[sendeReihenfolgearray[aktuellesFile]].SeNr);
 						//daten senden
 						sendRequest(&FileArray[sendeReihenfolgearray[aktuellesFile]]);
 						//nächstes file
@@ -260,10 +260,11 @@ int main(int argc, char* argv[]){
 				//quittungen prüfen und dateisegment aktualisieren
 				if(SqAnswer.AnswType == AnswOk){ //welche fehler können denn auftauchen und wie behandelt man sie?
 					setWindowFree(fensterArray,SqAnswer.SeNo);
-					del_timer(timerArray,SqAnswer.SeNo);
+					timerArray = del_timer(timerArray,SqAnswer.SeNo);
 				}else if(SqAnswer.AnswType == AnswClose){
 					setWindowFree(fensterArray,SqAnswer.SeNo);
-					del_timer(timerArray,SqAnswer.SeNo);
+					timerArray = del_timer(timerArray,SqAnswer.SeNo);
+					verbindungBeenden = 1;//testweise
 				}
 			
 			}
@@ -272,10 +273,11 @@ int main(int argc, char* argv[]){
 			decrement_timer(timerArray);
 
 			//warte die restliche zeit
-			Sleep(TIMEOUT_INT - (clock()-timer));
+			testtimer = (clock()-timer);
+			if(((clock_t)TIMEOUT_INT - (clock()-timer)) > 0) Sleep((clock_t)TIMEOUT_INT - (clock()-timer));
 
 			//setze abbruchbedingung
-			if(SqAnswer.AnswType == AnswClose) verbindungBeenden = 1;
+			//if(SqAnswer.AnswType == AnswClose) verbindungBeenden = 1;
 		//solange keine Antwort über ReqClose oder noch offene Timeouts oder noch nicht bestätigte Nachrichten
 		}while(getTimeout(timerArray) != -1 || getOpenWindows(fensterArray) != 0 || verbindungBeenden == 0);
 
