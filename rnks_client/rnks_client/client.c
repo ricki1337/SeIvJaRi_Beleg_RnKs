@@ -105,6 +105,7 @@ int main( int argc, char *argv[]){
 				//if paketverlust true
 				zufallszahl= rand();
 				if(Paketverlust != 0 && (zufallszahl % 100) <= PaketverlustProzent){					//überspringen und keine ack schicken
+					printf("Paket verloren!\n");
 					continue;
 				//else
 				}else{

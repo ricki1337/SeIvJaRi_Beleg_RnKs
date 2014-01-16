@@ -24,7 +24,7 @@ int getOpenWindows(struct window* windowArray){
 	for(i=0;i<windowSize;i++)
 		if(windowArray[i].ack == 0)
 			OpenWindows++;
-	//printf("Anz geoeffnete Fenster: %d\n",OpenWindows);
+	printf("Anz geoeffnete Fenster: %d\n",OpenWindows);
 	return OpenWindows;	
 }
 
@@ -34,6 +34,7 @@ int getNextFreeWindow(struct window* windowArray, long SqNr){
 		if(windowArray[i].ack == 1){
 			windowArray[i].ack = 0;
 			windowArray[i].SqNr = SqNr;
+			printf("Fenster %d geschlossen!\n",i);
 			return i;
 		}
 	}
@@ -47,6 +48,7 @@ int setWindowFree(struct window* windowArray, unsigned long SqNr){
 		if(windowArray[i].SqNr == SqNr){
 			windowArray[i].ack = 1;
 			windowArray[i].SqNr = -1;
+			printf("Fenster %d wieder offen!\n",i);
 			return 1;
 		}
 	}

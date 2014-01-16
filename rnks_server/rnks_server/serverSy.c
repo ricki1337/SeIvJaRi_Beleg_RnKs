@@ -170,8 +170,7 @@ void initConnection(char *empfIP,char *port, char* file, int fenstergroesse){
 	if(retSend != sizeof(nachricht)){
 		printf("Error: Es wurden nicht alle Daten versand!"); //TODO!
 	}
-	FD_ZERO(&myset);
-	FD_SET(ConnSocket,&myset);
+	
 }
 
 
@@ -239,8 +238,12 @@ int antwort_erhalten(clock_t timer){
 	struct timeval tval;
 	tval.tv_sec = 0;
 	tval.tv_usec = ((clock_t)TIMEOUT_INT - (clock()-timer))<0?0:(clock()-timer);
+	
+	if (((clock_t)TIMEOUT_INT - (clock()-timer))<0) return 0;
+	FD_ZERO(&myset);
+	FD_SET(ConnSocket,&myset);
 	printf("Sec: %d\n uSec: %d",tval.tv_sec,tval.tv_usec);
-	ret = select(ConnSocket+1,&myset,NULL,NULL,&tval);
+	ret = select(NULL,&myset,NULL,NULL,&tval);
 	if(ret < 0) printf("Error: select throws error nr. %d\n",WSAGetLastError());
 	return ret;
 }

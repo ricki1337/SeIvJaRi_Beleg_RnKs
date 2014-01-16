@@ -206,6 +206,7 @@ int main(int argc, char* argv[]){
 			//wenn fenster vorhanden
 			if(getOpenWindows(fensterArray) < Window_size){
 				if((timeoutRequest = getTimeout(timerArray)) != -1){//auf timeouts prüfen
+					printf("Timeout!#####\n");
 					//timer löschen
 					timerArray = del_timer(timerArray,FileArray[timeoutRequest].SeNr);
 					//timer einfügen
@@ -273,7 +274,6 @@ int main(int argc, char* argv[]){
 			decrement_timer(timerArray);
 
 			//warte die restliche zeit
-			testtimer = (clock()-timer);
 			if(((clock_t)TIMEOUT_INT - (clock()-timer)) > 0) Sleep((clock_t)TIMEOUT_INT - (clock()-timer));
 
 			//setze abbruchbedingung
