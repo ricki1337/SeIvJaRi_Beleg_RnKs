@@ -9,8 +9,6 @@ ws2_32.lib <- muss dort eingefügt werden
 #####TERMIN: Freitag, 17.01.
 
 ##TODO
-- Sendefenster einhalten beim Paketverlust(Pakete werden ohne abzuwarten neuverschickt, nach timeout)
-- timeout funktion überarbeiten 
 
 
 ##Test

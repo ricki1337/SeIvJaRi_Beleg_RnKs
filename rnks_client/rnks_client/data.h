@@ -1,7 +1,7 @@
 /* 	Data Oeclarations 
 	used by C!
 	Only Oata concerning Client and Server ! */
-#define TIMEOUT_INT 2000 //in Millisekunden
+#define TIMEOUT_INT 200 //in Millisekunden
 #define TIMEOUT 3 //must be a multiple of TIMEOUT_INT
 #define MAX_WINDOW 10
 #define DEFAULT_WINDOW 1

@@ -176,11 +176,12 @@ void initConnection(char *empfIP,char *port, char* file, int fenstergroesse){
 
 void sendRequest(struct request *paket){
 	int sendtostat;
-	char* reqChar;
+	//char* reqChar;
 
-	reqChar = (char*) malloc(sizeof(struct request));
-	memcpy(reqChar,paket,sizeof(struct request));
-	sendtostat = sendto(ConnSocket, reqChar,sizeof(struct request),0,(struct sockaddr *) &remoteAddr,sizeof(remoteAddr));
+	//reqChar = (char*) malloc(sizeof(struct request));
+	//memcpy(reqChar,paket,sizeof(struct request));
+	//sendtostat = sendto(ConnSocket, reqChar,sizeof(struct request),0,(struct sockaddr *) &remoteAddr,sizeof(remoteAddr));
+	sendtostat = sendto(ConnSocket, (char*)paket,sizeof(struct request),0,(struct sockaddr *) &remoteAddr,sizeof(remoteAddr));
 	if (sendtostat == SOCKET_ERROR) {
 		fprintf(stderr, "send() failed: error %d\n",WSAGetLastError());
 	}
@@ -242,9 +243,8 @@ int antwort_erhalten(clock_t timer){
 	if (((clock_t)TIMEOUT_INT - (clock()-timer))<0) return 0;
 	FD_ZERO(&myset);
 	FD_SET(ConnSocket,&myset);
-	printf("Sec: %d\n uSec: %d",tval.tv_sec,tval.tv_usec);
 	ret = select(NULL,&myset,NULL,NULL,&tval);
-	if(ret < 0) printf("Error: select throws error nr. %d\n",WSAGetLastError());
+	if(ret < 0) printf("Error: select() throws error nr. %d\n",WSAGetLastError());
 	return ret;
 }
 

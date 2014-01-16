@@ -5,7 +5,7 @@
 
 #include "Timer.h"
 
-#define DEBUG
+//#define DEBUG
 
 struct timeouts* add_timer(struct timeouts *list, int timer_val, unsigned long seq_nr){
 	struct timeouts *help, *new_elem;
@@ -16,7 +16,14 @@ struct timeouts* add_timer(struct timeouts *list, int timer_val, unsigned long s
 		list = new_elem;
 		list->next = NULL;
 	}else{
-		if (timer_val < list->timer){ //must be the first element
+		//gehe ans ende
+		help = list;
+		while(help->next != NULL) help = help->next;
+		//füge neues elem hinzu
+		help->next = new_elem;
+		//fülle elem mit daten
+		help->next->next = NULL;
+		/*if (timer_val < list->timer){ //must be the first element
 			help = new_elem;
 			list->timer = timer_val-timer_val; 	//this is now the second element,
 												//must be relative to the previous one
@@ -34,7 +41,7 @@ struct timeouts* add_timer(struct timeouts *list, int timer_val, unsigned long s
 			//new elementwill be inserted after help
 			new_elem->next = help->next;
 			help->next = new_elem;
-		}
+		}*/
 	}
 	new_elem->seq_nr = seq_nr;
 	new_elem->timer = timer_val;
