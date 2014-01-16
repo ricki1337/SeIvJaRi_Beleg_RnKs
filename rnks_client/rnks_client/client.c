@@ -68,7 +68,6 @@ int main( int argc, char *argv[]){
 
 			//socket registrieren
 			initSocket(PortTmp);
-			Paketverlust;
 			
 			//paketverlust überschreiben
 			if(strlen(PaketverlustProzenttmp)>0) PaketverlustProzent = atoi(PaketverlustProzenttmp);
@@ -105,7 +104,6 @@ int main( int argc, char *argv[]){
 				paket = getRequest();
 				//if paketverlust true
 
-				printf("*******************************%d###########################",PaketverlustProzent);
 				
 				zufallszahl= rand();
 				if(Paketverlust != 0 && (zufallszahl % 100) <= PaketverlustProzent){
