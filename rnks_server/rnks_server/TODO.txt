@@ -9,13 +9,8 @@ ws2_32.lib <- muss dort eingefügt werden
 #####TERMIN: Freitag, 17.01.
 
 ##TODO
-- saubere ausschrift was gerade passiert +sepp
-- pakete vertauschen einfügen +sepp
-- antworten mit fehlern bearbeiten +jakob
-- parameter prüfen +jakob
-- ipv6 adressformate beachten (::1 für localhost etc.) +jakob
-- verbindung auf dns basis +sepp
-- letztes Datenpaket wird mit sonderzeichen aufgefüllt (Filearray->name) -> Wandern mit in das Client file...
+- Sendefenster einhalten beim Paketverlust(Pakete werden ohne abzuwarten neuverschickt, nach timeout)
+- timeout funktion überarbeiten 
 
 
 ##Test
