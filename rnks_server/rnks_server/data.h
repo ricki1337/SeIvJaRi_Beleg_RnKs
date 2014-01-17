@@ -34,3 +34,10 @@ struct answer {
 	unsigned SeNo;
 	#define ErrNo SeNo /* are identical*/
 };
+
+
+//Struktur für Daten die aus der zu übertragenden Datei stammen
+struct fileread {
+	char rbuff[PufferSize]; //bildet den Lesebuffer aus der Datei
+	int ccount; //speichert die anzahl der gelesenen Zeichen
+};

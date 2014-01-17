@@ -11,6 +11,7 @@
 #include "toUdp.h"
 #include "file.h"
 #include "window.h"
+#include "userinformation.h"
 //#include "data.h"
 
 void Usage(char *ProgName){ //How to use program
@@ -23,7 +24,7 @@ void Usage(char *ProgName){ //How to use program
 int main( int argc, char *argv[]){
 			long i;
 			int Paketverlust = 0,PaketverlustProzent = DEFAULT_FAILURE;
-			struct request erstverbindung, *paket, *buff;
+			struct request erstverbindung, *paket, *buff,paketcpy;
 			struct answer antwort;
 			int verbindungBeendet = 0, ackWindow;
 			clock_t timer;
@@ -71,10 +72,13 @@ int main( int argc, char *argv[]){
 			
 			//paketverlust überschreiben
 			if(strlen(PaketverlustProzenttmp)>0) PaketverlustProzent = atoi(PaketverlustProzenttmp);
-			
+			printf("\nWarte auf Request... ");
 			//auf verbindung warten
 			memcpy(&erstverbindung,getRequest(),sizeof(struct request));
 			
+			UserInformation(2,&erstverbindung,NULL);
+			printf("empfangen, starte Datenaustausch.\n");
+
 			//req prüfen
 			if(erstverbindung.ReqType == ReqHello && erstverbindung.FlNr >= 1 && erstverbindung.FlNr <= 10 && erstverbindung.SeNr > 0){
 				//datenarray erstellen
@@ -83,7 +87,7 @@ int main( int argc, char *argv[]){
 				fensterArray = createWindowArray(erstverbindung.FlNr);
 				//antwort füllen
 				antwort.AnswType = AnswHello;
-				printf("\nSende Antwort (AnswHello)...\n");
+				//printf("\nSende Antwort (AnswHello)...\n");
 				antwort.SeNo = erstverbindung.SeNr; //filesize bestätigen
 				antwort.FlNr = erstverbindung.FlNr; //fenstergröße bestätigen
 				//fenstergröße zwischenspeichern
@@ -98,14 +102,27 @@ int main( int argc, char *argv[]){
 			//ack verschicken
 			sendAnswer(&antwort);
 			
+			//Antwort auf Bildschirm ausgeben
+			UserInformation(3,0,&antwort);
+			
 			//schleife
 			do {
 				//warte auf nachricht
 				paket = getRequest();
+
+				//empfangenes Paket zwischenspeichern in struct request variable
+				memcpy(&paketcpy,paket,sizeof(struct request));
+
+				//Informationen zum Paket ausgeben
+				UserInformation(4,&paketcpy,0);
+
+				//Pointer wird "zerstört", zurückkopieren aus zwischengespeicherten Paket
+				memcpy(paket,&paketcpy,sizeof(struct request));
 				//if paketverlust true
 				zufallszahl= rand();
 				if(Paketverlust != 0 && (zufallszahl % 100) <= PaketverlustProzent){					//überspringen und keine ack schicken
 					printf("Paket verloren!\n");
+					//überspringen und keine ack schicken
 					continue;
 				//else
 				}else{
@@ -137,8 +154,9 @@ int main( int argc, char *argv[]){
 						antwort.AnswType = fensterArray[ackWindow].AnswType;
 						antwort.SeNo = fensterArray[ackWindow].error;
 					}
-					//ack versenden
+					//Antwort senden und ausgeben
 					sendAnswer(&antwort);
+					UserInformation(3,NULL,&antwort);
 					if(antwort.AnswType == AnswClose) verbindungBeendet = 1;
 				}
 			//solange die verbindung nicht beendet wurde
@@ -155,10 +173,11 @@ int main( int argc, char *argv[]){
 				if (saveFile(fp,fileArray,(fileArraySize/PufferSize)))  {
 					closeFile(fp);
 					printf("Datei \x81 \bbermittelt und gespeichert.\nBeende...\n");
+					return EXIT_SUCCESS;
 					}
 				} 
 			//filepointer schließen, falls speichern nicht funktioniert hat
 			if(fp != NULL) closeFile(fp);	
+			return EXIT_FAILURE;
 			
-			return EXIT_SUCCESS;
 }

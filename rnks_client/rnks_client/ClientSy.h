@@ -13,4 +13,4 @@ void configSocket();
 int exitSocket();
 void printRequest(struct request *req);
 void printAnswer(struct answer *ans);
-char* ipv6convert(struct addrinfo *pipv6);
+char* ipv6convert(struct addrinfo *pipv6, struct sockaddr_in6 *pipv62);

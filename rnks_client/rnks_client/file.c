@@ -21,7 +21,7 @@ FILE* openFile(char *fileName, FILE **fp){
 
 void closeFile(FILE *fp){
 	if(fp != NULL) fclose(fp);
-	printf("Succesfull closed file.\n");
+	//printf("Succesfull closed file.\n");
 }
 
 struct request* createFileArray(int filesize){
@@ -31,7 +31,7 @@ struct request* createFileArray(int filesize){
 		FileArray = (struct request *) malloc(((int)(filesize/(PufferSize))+1)*sizeof(struct request));
 		while(i < ((int)(filesize/(PufferSize))+1)){
 			memcpy(FileArray[i].name,"",PufferSize*sizeof(char)); //daten
-			FileArray[i].name[0] = '\0';
+			FileArray[i].name[0] = '\0'; //Dateninhalt
 			FileArray[i].FlNr = 0; //datenlänge
 			FileArray[i].ReqType = 0; //reqtype
 			FileArray[i].SeNr = i;//sqnr
@@ -48,8 +48,8 @@ int saveFile(FILE *fp, struct request* FileAry, int sizeFA) {
 	int i,c;
 
 	for (i=0;i<=(sizeFA);i++) {
-		//alternativ zeichenweiße....
-		if (c=fwrite(FileAry[i].name,sizeof(char),FileAry[i].FlNr,fp)==NULL)
+		//schreiben der Daten aus Filearray->name (Daten) in Datei, Länge 256 Zeichen
+		if ((c=fwrite(FileAry[i].name,sizeof(char),FileAry[i].FlNr,fp))==NULL)
 			return 0;
 		}
 	return 1;

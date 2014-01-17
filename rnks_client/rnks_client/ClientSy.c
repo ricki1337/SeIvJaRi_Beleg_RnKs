@@ -106,7 +106,7 @@ int initSocket(char * port){
 			case AF_INET6:	printf( "AF_INET6 (IPv6)\n" );
 							sockaddr_ip6_local = (struct sockaddr *) ptr->ai_addr;
 							addr_len= ptr->ai_addrlen;
-							printf("\tIPv6 Addresse/Port: %s\n",ipv6convert(ptr));
+							printf("\tIPv6 Addresse/Port: %s\n",ipv6convert(ptr,0));
 							break;
 			default :		printf("Other %ld\n" , ptr->ai_family);
 							break;
@@ -136,11 +136,9 @@ struct request* getRequest() {
 	/* Receive a message from a socket */
 	//printf( "vor recvfrom\n" );
 	tmp = (char *) malloc(sizeof(struct request));
-	
-	printf("\nWarte auf Request... ");
+
 	recvcc = recvfrom(ConnSocket, tmp, sizeof(struct request), 0, (struct sockaddr *) &remoteAddr, &remoteAddrSize);
-	//printf("Packet from %s",ipv6convert(remoteAddr));
-	printf("\tPacket empfangen, gr\x94sse: %d\n",recvcc);
+		//printf("Packet from %s",ipv6convert(remoteAddr));
 	memcpy(&req,tmp,sizeof(struct request));
 	
 	if(WSAGetLastError() == 10035) return NULL;
@@ -159,8 +157,8 @@ struct request* getRequest() {
 		exit(-1);
 	}
 	
-	printRequest(&req);
-
+	//printRequest(&req);
+	printf("Request von Adresse/Port: %s ",ipv6convert(0,&remoteAddr));
 	return (&req);
 }
 
@@ -176,7 +174,7 @@ void sendAnswer(struct answer *answ) {
 		Sleep(500); // or just simply skip the sendto to simulate dropping of packet
 	}
 	*/
-	printAnswer(answ);
+	//printAnswer(answ);
 	
 	//reqChar = (char*) malloc(sizeof(answ));
 	//memcpy(reqChar,&answ,sizeof(answ));
@@ -208,7 +206,7 @@ void configSocket(){
 int exitSocket() {
 	
 	closesocket(ConnSocket);
-	printf( "in exit server\n" );
+	//printf( "in exit server\n" );
 	
 	if (WSACleanup()==SOCKET_ERROR){
 		printf( "SERVER: WSACleanup() failed!\n" );
@@ -237,25 +235,42 @@ void printAnswer(struct answer *ans){
 	printf("\n\n");
 }
 
-char* ipv6convert(struct addrinfo *pipv6) {
+char* ipv6convert(struct addrinfo *pipv6, struct sockaddr_in6 *pipv62) {
+	// Quelle: http://msdn.microsoft.com/en-us/library/windows/desktop/ms738520%28v=vs.85%29.aspx
 	// We use WSAAddressToString since it is supported on Windows XP and later
 	// The buffer length is changed by each call to WSAAddresstoString
 	// So we need to set it for each iteration through the loop for safety
 	
 	/* for IPv6 Adress resolution LPSOCKADDR->Unicode->Ansi*/
-	TCHAR ipw[46];
-	CHAR ipa[46];
-	DWORD ipbufferlength = 46;
-	INT iRetval;
 
-	ipbufferlength = 46;
-	iRetval = WSAAddressToString(pipv6->ai_addr, (DWORD) pipv6->ai_addrlen, NULL, ipw, &ipbufferlength );
-	wcstombs(ipa,ipw,ipbufferlength);
-	if (!(iRetval))
-		return ipa;
+		TCHAR ipw[46];
+		CHAR ipa[46];
+		DWORD ipbufferlength = 46;
+		INT iRetval;
+		LPSOCKADDR sockaddr_ip;
+		//ipbufferlength = 46;
 
-	printf("WSAAddressToString fehlgeschlagen mit %u\n", WSAGetLastError() );
-  	return "NULL";
+	if(pipv6!=NULL){
+	
+		iRetval = WSAAddressToString(pipv6->ai_addr, (DWORD) pipv6->ai_addrlen, NULL, ipw, &ipbufferlength );
+		wcstombs(ipa,ipw,ipbufferlength);
+		if (!(iRetval))
+			return ipa;
+
+		printf("WSAAddressToString fehlgeschlagen mit %u\n", WSAGetLastError() );
+  		return "NULL";
+	}
+	if (pipv62!=NULL)	{
+		sockaddr_ip = (LPSOCKADDR) pipv62;
+
+		iRetval = WSAAddressToString(sockaddr_ip, (DWORD) pipv62, NULL, ipw, &ipbufferlength );
+		wcstombs(ipa,ipw,ipbufferlength);
+		if (!(iRetval))
+			return ipa;
+
+		printf("WSAAddressToString fehlgeschlagen mit %u\n", WSAGetLastError() );
+  		return "NULL";
+	}
 		
 	
-	}
+}

@@ -36,6 +36,9 @@
     <ClInclude Include="window.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
+    <ClInclude Include="UserInformation.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Timer.c">
@@ -54,6 +57,9 @@
       <Filter>Quelldateien</Filter>
     </ClCompile>
     <ClCompile Include="window.c">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
+    <ClCompile Include="UserInformation.c">
       <Filter>Quelldateien</Filter>
     </ClCompile>
   </ItemGroup>

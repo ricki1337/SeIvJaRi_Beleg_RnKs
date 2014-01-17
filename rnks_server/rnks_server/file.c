@@ -30,9 +30,12 @@ int getFileSize(){
 	return fileInfo->st_size;
 }
 
-char* getChars(FILE *fp,int anzZeichen, int pos){
+struct fileread* getChars(FILE *fp,int anzZeichen, int pos){
+	
 	int anzLsbZeichen=0;
-	char buff[PufferSize];
+	//char buff[PufferSize];
+	struct fileread buff; //evtl als pointer erstellen mit malloc besser ??
+
 	//anzZeichen--;//um 1 decrementieren um \0 anzufügen
 	if(fp != NULL){ //ist dateizeiger geöffnet?
 		//if(pos > fileInfo->st_size) return NULL;//existiert die gesuchte pos?
@@ -44,10 +47,12 @@ char* getChars(FILE *fp,int anzZeichen, int pos){
 		//buff = (char*) malloc((anzZeichen)*sizeof(char));//puffer anpassen
 		//lese die zeichen...
 		//fseek(fp,pos,SEEK_SET);//gehe an die richtige pos
-		if(anzZeichen != PufferSize) fread(buff,sizeof(char),(anzZeichen-1)*sizeof(char),fp);//lese
-		else fread(&buff,sizeof(char),(anzZeichen)*sizeof(char),fp);//lese
+		//if(anzZeichen != PufferSize) fread(buff,sizeof(char),(anzZeichen-1)*sizeof(char),fp);//lese
+		if(anzZeichen != PufferSize) buff.ccount=fread(buff.rbuff,sizeof(char),(anzZeichen-1)*sizeof(char),fp);//lese
+		//else fread(&buff,sizeof(char),(anzZeichen)*sizeof(char),fp);//lese
+		else buff.ccount=fread(buff.rbuff,sizeof(char),(anzZeichen)*sizeof(char),fp);//lese
 		//buff[anzZeichen] = '\0'; //stringende anfügen
-		return buff;//gib den char* zurück
+		return &buff;//gibt die fileread struktur zurück
 		
 	}
 	return NULL;
@@ -61,7 +66,8 @@ void closeFile(FILE *fp){
 struct request* createFileArray(char *fileName,int *filearrysize){
 	int i=0,buf,tmpSize; //faktor für pos berechnung
 	struct request *FileArray;
-	char *tmp;
+	//char* tmp;
+	struct fileread *tmp=NULL; 
 	FILE *fp=NULL;
 	
 	
@@ -79,8 +85,11 @@ struct request* createFileArray(char *fileName,int *filearrysize){
 			tmpSize = buf;
 			//if((int)(fileInfo->st_size/buf) == i) tmpSize = fileInfo->st_size%buf;
 			if((int)(filesize/buf) == i) tmpSize = filesize%buf;
-			memcpy(FileArray[i].name,tmp,tmpSize*sizeof(char)); //daten
-			FileArray[i].FlNr = tmpSize; //datenlänge
+			//memcpy(FileArray[i].name,tmp,tmpSize*sizeof(char)); //daten
+			//memcpy(FileArray[i].name,tmp->rbuff,tmpSize*sizeof(char)); //daten
+			memcpy(FileArray[i].name,tmp->rbuff,tmp->ccount*sizeof(char)); //daten
+			//FileArray[i].FlNr = tmpSize; //datenlänge
+			FileArray[i].FlNr = tmp->ccount; //datenlänge
 			FileArray[i].ReqType = ReqData; //reqtype
 			FileArray[i].SeNr = i;//sqnr
 			memcpy(FileArray[i].fname,fileName,strlen(fileName)+1);
