@@ -4,7 +4,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
-//#include "data.h" //wurde hier auskommentiert da sie schon mit Userinforamtion.c und .h importiert wird. Sonst fehler wegen NeuDefinition
 #include "toUdp.h"
 #include "file.h"
 #include <ctype.h>
@@ -12,7 +11,6 @@
 #include "UserInformation.h"
 
 
-/*static struct request req;*/
 struct request req;
 
 SOCKET ConnSocket;
@@ -111,40 +109,7 @@ void initConnection(char *empfIP,char *port, char* file, int fenstergroesse){
     }
 	//komplett von http://msdn.microsoft.com/de-de/library/windows/desktop/ms738630(v=vs.85).aspx übernommen
 
-	/*
-	memset( &remoteAddr, 0, sizeof (remoteAddr));
-
-	//socket wird vom os geholt
-	ConnSocket = socket(AF_INET6,SOCK_DGRAM,0);
-	if(ConnSocket < 0){//im fehlerfall
-		printf("Error: socket() throws error nr. %d!\n",WSAGetLastError());
-		exit(-1); //ende!
-	}
 	
-	
-	remoteAddr.sin6_family = AF_INET6; //protokoll setzen
-		
-	//ip adresse setzen
-	if ((addr = inet_addr( empfIP )) != INADDR_NONE) {
-       //serverIP ist eine numerische IP-Adresse.
-       memcpy( (char *)&remoteAddr.sin6_addr, &addr, sizeof(addr));
-   }
-	
-	//fallback wenn serverIP == NULL -> localhost!
-	if( empfIP == NULL) 
-		remoteAddr.sin6_addr = in6addr_loopback;
-
-	
-	remoteAddr.sin6_port = htons(atoi(port)); //port setzen
-	
-	UserInformation(1,NULL,NULL);
-	//stelle verbindung her
-	if(connect(ConnSocket,(struct sockaddr*)&remoteAddr,sizeof(remoteAddr)) < 0){//im fehlerfall
-		printf("Error: connect() throws error nr. %d!\n",WSAGetLastError());
-		WSACleanup ();
-		exit(-1);
-	}
-	*/
 	//schicke erste nachricht
 	nachricht.FlNr = (long) fenstergroesse; //fenstergröße
 	if(file != NULL) memcpy(nachricht.fname,file,sizeof(nachricht.fname));//dateiname
@@ -163,12 +128,11 @@ void initConnection(char *empfIP,char *port, char* file, int fenstergroesse){
 	UserInformation(2,&nachricht,NULL);
 
 	//senden der ersten nachricht
-	//retSend = sendto(ConnSocket,reqChar,sizeof(nachricht),0,(struct sockaddr*)&remoteAddr,sizeof(remoteAddr));
-	retSend = sendto(ConnSocket,reqChar,sizeof(nachricht),0,AI->ai_addr, (int) AI->ai_addrlen); //neu...
+	retSend = sendto(ConnSocket,reqChar,sizeof(nachricht),0,AI->ai_addr, (int) AI->ai_addrlen);
 
 	//auswerten des returnwertes von send
 	if(retSend != sizeof(nachricht)){
-		printf("Error: Es wurden nicht alle Daten versand!"); //TODO!
+		printf("Error: Es wurden nicht alle Daten versand!");
 	}
 	
 }
@@ -176,11 +140,6 @@ void initConnection(char *empfIP,char *port, char* file, int fenstergroesse){
 
 void sendRequest(struct request *paket){
 	int sendtostat;
-	//char* reqChar;
-
-	//reqChar = (char*) malloc(sizeof(struct request));
-	//memcpy(reqChar,paket,sizeof(struct request));
-	//sendtostat = sendto(ConnSocket, reqChar,sizeof(struct request),0,(struct sockaddr *) &remoteAddr,sizeof(remoteAddr));
 	sendtostat = sendto(ConnSocket, (char*)paket,sizeof(struct request),0,(struct sockaddr *) &remoteAddr,sizeof(remoteAddr));
 	if (sendtostat == SOCKET_ERROR) {
 		fprintf(stderr, "send() failed: error %d\n",WSAGetLastError());
@@ -221,7 +180,7 @@ struct answer* getAnswer(){
 	return (&req);
 }
 
-int exitSocket() {
+void exitSocket() {
 	
 	closesocket(ConnSocket);
 	printf( "in exit server\n" );
@@ -231,7 +190,7 @@ int exitSocket() {
 		printf( " error code: %d\n",WSAGetLastError());
 		exit(-1);
 	}
-	return(0);
+	//return(0);
 }
 
 int antwort_erhalten(clock_t timer){
@@ -244,7 +203,7 @@ int antwort_erhalten(clock_t timer){
 	FD_ZERO(&myset);
 	FD_SET(ConnSocket,&myset);
 	ret = select(NULL,&myset,NULL,NULL,&tval);
-	if(ret < 0) printf("Error: select() throws error nr. %d\n",WSAGetLastError());
+		if(ret < 0) printf("Error: select() throws error nr. %d\n",WSAGetLastError());
 	return ret;
 }
 
