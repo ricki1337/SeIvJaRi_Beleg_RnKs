@@ -106,7 +106,7 @@ int initSocket(char * port){
 			case AF_INET6:	printf( "AF_INET6 (IPv6)\n" );
 							sockaddr_ip6_local = (struct sockaddr *) ptr->ai_addr;
 							addr_len= ptr->ai_addrlen;
-							printf("\tIPv6 Addresse/Port: %s\n",ipv6convert(ptr,0));
+							//printf("\tIPv6 Addresse/Port: %s\n",ipv6convert(ptr,0));
 							break;
 			default :		printf("Other %ld\n" , ptr->ai_family);
 							break;
@@ -158,7 +158,7 @@ struct request* getRequest() {
 	}
 	
 	//printRequest(&req);
-	printf("Request von Adresse/Port: %s ",ipv6convert(0,&remoteAddr));
+	//printf("Request von Adresse/Port: %s ",ipv6convert(0,&remoteAddr));
 	return (&req);
 }
 
@@ -235,42 +235,44 @@ void printAnswer(struct answer *ans){
 	printf("\n\n");
 }
 
-char* ipv6convert(struct addrinfo *pipv6, struct sockaddr_in6 *pipv62) {
-	// Quelle: http://msdn.microsoft.com/en-us/library/windows/desktop/ms738520%28v=vs.85%29.aspx
-	// We use WSAAddressToString since it is supported on Windows XP and later
-	// The buffer length is changed by each call to WSAAddresstoString
-	// So we need to set it for each iteration through the loop for safety
-	
-	/* for IPv6 Adress resolution LPSOCKADDR->Unicode->Ansi*/
 
-		TCHAR ipw[46];
-		CHAR ipa[46];
-		DWORD ipbufferlength = 46;
-		INT iRetval;
-		LPSOCKADDR sockaddr_ip;
-		//ipbufferlength = 46;
-
-	if(pipv6!=NULL){
-	
-		iRetval = WSAAddressToString(pipv6->ai_addr, (DWORD) pipv6->ai_addrlen, NULL, ipw, &ipbufferlength );
-		wcstombs(ipa,ipw,ipbufferlength);
-		if (!(iRetval))
-			return ipa;
-
-		printf("WSAAddressToString fehlgeschlagen mit %u\n", WSAGetLastError() );
-  		return "NULL";
-	}
-	if (pipv62!=NULL)	{
-		sockaddr_ip = (LPSOCKADDR) pipv62;
-
-		iRetval = WSAAddressToString(sockaddr_ip, (DWORD) pipv62, NULL, ipw, &ipbufferlength );
-		wcstombs(ipa,ipw,ipbufferlength);
-		if (!(iRetval))
-			return ipa;
-
-		printf("WSAAddressToString fehlgeschlagen mit %u\n", WSAGetLastError() );
-  		return "NULL";
-	}
-		
-	
-}
+//Auskommentiert da Probleme mit WinXP
+//char* ipv6convert(struct addrinfo *pipv6, struct sockaddr_in6 *pipv62) {
+//	// Quelle: http://msdn.microsoft.com/en-us/library/windows/desktop/ms738520%28v=vs.85%29.aspx
+//	// We use WSAAddressToString since it is supported on Windows XP and later
+//	// The buffer length is changed by each call to WSAAddresstoString
+//	// So we need to set it for each iteration through the loop for safety
+//	
+//	/* for IPv6 Adress resolution LPSOCKADDR->Unicode->Ansi*/
+//
+//		TCHAR ipw[46];
+//		CHAR ipa[46];
+//		DWORD ipbufferlength = 46;
+//		INT iRetval;
+//		LPSOCKADDR sockaddr_ip;
+//		//ipbufferlength = 46;
+//
+//	if(pipv6!=NULL){
+//	
+//		iRetval = WSAAddressToString(pipv6->ai_addr, (DWORD) pipv6->ai_addrlen, NULL, ipw, &ipbufferlength );
+//		wcstombs(ipa,ipw,ipbufferlength);
+//		if (!(iRetval))
+//			return ipa;
+//
+//		printf("WSAAddressToString fehlgeschlagen mit %u\n", WSAGetLastError() );
+//  		return "NULL";
+//	}
+//	if (pipv62!=NULL)	{
+//		sockaddr_ip = (LPSOCKADDR) pipv62;
+//
+//		iRetval = WSAAddressToString(sockaddr_ip, (DWORD) pipv62, NULL, ipw, &ipbufferlength );
+//		wcstombs(ipa,ipw,ipbufferlength);
+//		if (!(iRetval))
+//			return ipa;
+//
+//		printf("WSAAddressToString fehlgeschlagen mit %u\n", WSAGetLastError() );
+//  		return "NULL";
+//	}
+//		
+//	
+//}
