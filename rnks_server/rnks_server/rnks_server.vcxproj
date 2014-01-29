@@ -82,6 +82,7 @@
     <ClInclude Include="config.h" />
     <ClInclude Include="data.h" />
     <ClInclude Include="file.h" />
+    <ClInclude Include="debug.h" />
     <ClInclude Include="serverSy.h" />
     <ClInclude Include="Timer.h" />
     <ClInclude Include="toUdp.h" />

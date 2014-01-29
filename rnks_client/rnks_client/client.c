@@ -63,7 +63,7 @@ int main( int argc, char *argv[]){
 										break;
 						}
 					
-					}//else Usage(argv[0]);
+					}else Usage(argv[0]);
 				}
 			}
 
@@ -168,11 +168,11 @@ int main( int argc, char *argv[]){
 			//datei erstellen
 
 			if (fp=openFile(erstverbindung.fname,&fp)) {
-				printf("\nDatei wird gespeichert...\n");
+				//printf("\nDatei wird gespeichert...\n");
 				//datei zusammensetzen und speichern
 				if (saveFile(fp,fileArray,(fileArraySize/PufferSize)))  {
 					closeFile(fp);
-					printf("Datei \x81 \bbermittelt und gespeichert.\nBeende...\n");
+					//printf("Datei \x81 \bbermittelt und gespeichert.\nBeende...\n");
 					return EXIT_SUCCESS;
 					}
 				} 

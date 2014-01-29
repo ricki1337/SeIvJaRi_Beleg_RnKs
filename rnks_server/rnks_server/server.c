@@ -1,4 +1,4 @@
-
+#include "debug.h"
 #include "serverSy.h" //SAP to our protocol
 #include "config.h"
 #include <stdio.h>
@@ -15,6 +15,7 @@
 #include "toUdp.h"
 #include "data.h"
 
+//#define DEBUG
 
 void Usage(char *ProgName){ //How to use program
 	fprintf(stderr, P_MESSAGE_1);
@@ -164,6 +165,8 @@ int main(int argc, char* argv[]){
 	//server starten
 	initConnection(Empfaenger,Port,Filename,Window_size);
 
+	//wenn innerhalb von 10sec keine antwort -> beenden
+
 	//auf antwort vom empfänger warten
 	erstverbindung = getAnswer();
 	
@@ -190,11 +193,18 @@ int main(int argc, char* argv[]){
 		
 		//schleife
 		do{
-		
+			#ifdef DEBUG
+				//für übersicht sorgen...
+				system("cls");
+				//window anzeigen
+				showWindow(fensterArray);
+			#endif
+
 			//timer starten
 			timer = clock();
+
 			//wenn fenster vorhanden oder aber ein timeout auftritt...sonst deadlock!
-			if((timeoutRequest = getTimeout(timerArray)) != -1 || getOpenWindows(fensterArray) < Window_size){
+			if((timeoutRequest = decrement_timer(timerArray)) != -1 || getOpenWindows(fensterArray) < Window_size){
 				if(timeoutRequest != -1){//auf timeouts prüfen
 					//workaround für closing paket....
 					if(timeoutRequest == 0xFFFF){
@@ -212,7 +222,7 @@ int main(int argc, char* argv[]){
 						//daten mit timeout nochmals versenden
 						sendRequest(&FileArray[timeoutRequest]);
 					}
-				}else if(aktuellesFile == maxFiles && getTimeout(timerArray) == -1 && verbindungBeenden == 0){
+				}else if(aktuellesFile == maxFiles && timeoutRequest == -1 && verbindungBeenden == 0){
 					//es wurden alle info übermittelt
 					//baue verbindung ab
 					//erst schauen ob überhaupt ein fenster frei ist
@@ -260,14 +270,9 @@ int main(int argc, char* argv[]){
 			
 			}
 
-			//timer dekrementieren
-			decrement_timer(timerArray);
-
 			//warte die restliche zeit
 			if(((clock_t)TIMEOUT_INT - (clock()-timer)) > 0) Sleep((clock_t)TIMEOUT_INT - (clock()-timer));
 
-			//setze abbruchbedingung
-			//if(SqAnswer.AnswType == AnswClose) verbindungBeenden = 1;
 		//solange keine Antwort über ReqClose oder noch offene Timeouts oder noch nicht bestätigte Nachrichten
 		}while(getTimeout(timerArray) != -1 || getOpenWindows(fensterArray) != 0 || verbindungBeenden == 0);
 

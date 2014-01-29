@@ -9,6 +9,6 @@
 void initConnection(char *empfIP,char *port, char* file, int fenstergroesse);
 void sendRequest(struct request *paket);
 struct answer* getAnswer();
-int exitSocket();
+void exitSocket();
 int antwort_erhalten(clock_t timer);
 void sendeReihenfolge(int *array,int size,int unordnung);

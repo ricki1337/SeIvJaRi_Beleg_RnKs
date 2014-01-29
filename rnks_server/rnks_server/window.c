@@ -51,3 +51,11 @@ int setWindowFree(struct window* windowArray, unsigned long SqNr){
 	}
 	return 0; //error! SqNr nicht vorhanden!
 }
+
+void showWindow(struct window* windowArray){
+	int i;
+	printf("Fensterzustand:\nWin\tSq\tAc\n");
+	for(i=0;i<windowSize;i++){
+		printf("%d\t%d\t%d\n",i,windowArray[i].SqNr,windowArray[i].ack);
+	}
+}

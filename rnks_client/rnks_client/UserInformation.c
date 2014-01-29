@@ -31,7 +31,7 @@ void UserInformation(int MessageCode, struct request *req, struct answer *ans){
 			printf("\t|SqNr................%d\n",req->SeNr);
 			printf("Msg# %d\t|FlNr................%d\n",msgcounter,req->FlNr);
 			printf("\t|Filename............%s\n",req->fname);
-			printf("\t|Content:\n\n\"%s\"\n",req->name);
+			//printf("\t|Content:\n\n\"%s\"\n",req->name);
 			break;
 	}
 	printf("\n\n");

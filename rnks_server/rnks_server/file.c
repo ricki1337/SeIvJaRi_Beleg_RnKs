@@ -3,11 +3,6 @@
 #include <sys\stat.h>
 #include <string.h>
 #include "data.h"
-/*
-	- öffnen der file im textmodus
-	- zerteilen der file in ein array a PufferSize-1 + 50-1 zeichen
-	- schließen der file
-*/
 
 struct stat *fileInfo;
 int filesize;
@@ -36,22 +31,13 @@ struct fileread* getChars(FILE *fp,int anzZeichen, int pos){
 	//char buff[PufferSize];
 	struct fileread buff; //evtl als pointer erstellen mit malloc besser ??
 
-	//anzZeichen--;//um 1 decrementieren um \0 anzufügen
 	if(fp != NULL){ //ist dateizeiger geöffnet?
-		//if(pos > fileInfo->st_size) return NULL;//existiert die gesuchte pos?
 		if(pos > filesize) return NULL;//existiert die gesuchte pos?
-		//if((anzLsbZeichen = (fileInfo->st_size-(pos))) < anzZeichen ) 
 		if((anzLsbZeichen = (filesize-(pos))) < anzZeichen ) 
 			anzZeichen = anzLsbZeichen;//wie viele zeichen können überhaupt noch gelesen werden?
 			
-		//buff = (char*) malloc((anzZeichen)*sizeof(char));//puffer anpassen
-		//lese die zeichen...
-		//fseek(fp,pos,SEEK_SET);//gehe an die richtige pos
-		//if(anzZeichen != PufferSize) fread(buff,sizeof(char),(anzZeichen-1)*sizeof(char),fp);//lese
 		if(anzZeichen != PufferSize) buff.ccount=fread(buff.rbuff,sizeof(char),(anzZeichen-1)*sizeof(char),fp);//lese
-		//else fread(&buff,sizeof(char),(anzZeichen)*sizeof(char),fp);//lese
 		else buff.ccount=fread(buff.rbuff,sizeof(char),(anzZeichen)*sizeof(char),fp);//lese
-		//buff[anzZeichen] = '\0'; //stringende anfügen
 		return &buff;//gibt die fileread struktur zurück
 		
 	}
@@ -66,7 +52,6 @@ void closeFile(FILE *fp){
 struct request* createFileArray(char *fileName,int *filearrysize){
 	int i=0,buf,tmpSize; //faktor für pos berechnung
 	struct request *FileArray;
-	//char* tmp;
 	struct fileread *tmp=NULL; 
 	FILE *fp=NULL;
 	
@@ -74,21 +59,15 @@ struct request* createFileArray(char *fileName,int *filearrysize){
 	buf = (int)PufferSize;
 	if(fp = openFile(fileName)){
 
-		//FileArray = (struct request *) malloc(((int)(fileInfo->st_size/buf)+1)*sizeof(struct request));
 		FileArray = (struct request *) malloc(((int)(filesize/buf)+1)*sizeof(struct request));
 		
-		//while(i < ((int)(fileInfo->st_size/buf)+1)){
 		while(i < ((int)(filesize/buf)+1)){
 			tmp = getChars(fp,buf, i*buf);
 			
 			//info in req 
 			tmpSize = buf;
-			//if((int)(fileInfo->st_size/buf) == i) tmpSize = fileInfo->st_size%buf;
 			if((int)(filesize/buf) == i) tmpSize = filesize%buf;
-			//memcpy(FileArray[i].name,tmp,tmpSize*sizeof(char)); //daten
-			//memcpy(FileArray[i].name,tmp->rbuff,tmpSize*sizeof(char)); //daten
 			memcpy(FileArray[i].name,tmp->rbuff,tmp->ccount*sizeof(char)); //daten
-			//FileArray[i].FlNr = tmpSize; //datenlänge
 			FileArray[i].FlNr = tmp->ccount; //datenlänge
 			FileArray[i].ReqType = ReqData; //reqtype
 			FileArray[i].SeNr = i;//sqnr
